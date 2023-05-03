@@ -1,6 +1,8 @@
 package com.example;
 
 import com.example.model.ProteinChain;
+import com.example.services.distance.AbstractMetricSpaceDBImpl;
+import com.example.services.distance.EvalAndStoreObjectsToPivotsDists;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
@@ -89,29 +91,19 @@ public class App
 
     public static void main( String[] args )
     {
-
         try (SessionFactory sessionFactory = new Configuration()
                 .configure("hibernate.cfg.xml")
                 .buildSessionFactory();
              Session session = sessionFactory.openSession()) {
-            MetricSpacesStorageInterfaceDBImpl storage = new MetricSpacesStorageInterfaceDBImpl(session);
-            Iterator<Object> objIterator  = storage.getObjectsFromDataset("???");
-            Iterator<ProteinChain> proteinIterator = new Iterator<>() {
-                @Override
-                public boolean hasNext() {
-                    return objIterator.hasNext();
-                }
 
-                @Override
-                public ProteinChain next() {
-                    return (ProteinChain) objIterator.next();
-                }
-            };
-            while (proteinIterator.hasNext()) {
-                var protein = proteinIterator.next();
-                System.out.println(protein.getGesamtId());
-            }
+            var metricSpace = new AbstractMetricSpaceDBImpl();
+            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(session);
+            var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
+
+            var evaluator = new EvalAndStoreObjectsToPivotsDists(session);
+            evaluator.run(dataset);
         }
+
 
     }
 }

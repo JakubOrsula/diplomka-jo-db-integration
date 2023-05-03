@@ -3,9 +3,13 @@ package com.example.services.storage;
 import com.example.model.PivotSet;
 import com.example.model.Pivot512;
 import com.example.model.ProteinChain;
+import com.example.model.SimpleProtein;
 import org.hibernate.*;
 import vm.metricSpace.MetricSpacesStorageInterface;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +30,7 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         session.beginTransaction();
 
         ScrollableResults results = session.createQuery("from ProteinChain").scroll(ScrollMode.FORWARD_ONLY);
-        Iterator<ProteinChain> iterator = new Iterator<>() {
+        Iterator<SimpleProtein> iterator = new Iterator<SimpleProtein>() {
             @Override
             public boolean hasNext() {
                 boolean hasNext = results.next();
@@ -38,8 +42,9 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
             }
 
             @Override
-            public ProteinChain next() {
-                return (ProteinChain) results.get(0);
+            public SimpleProtein next() {
+                var pc = (ProteinChain) results.get(0);
+                return new SimpleProtein(pc.getIntId(), pc.getGesamtId());
             }
         };
 
@@ -49,11 +54,18 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
 
     public List<Object> getPivots(String pivotSetName, Object... params) {
         //todo get only current pivots based on pivotSet
+        //todo the current pivotset should be locked in redis
         session.beginTransaction();
 
-        var proteinList = session.createQuery("from Pivot512").list();
+        var pivotSet = getCurrentPivotSet();
+        List<Pivot512> proteinList = session.createQuery("select p from Pivot512 p join p.id.pivotSet ps where ps = :pivotSet", Pivot512.class)
+                .setParameter("pivotSet", pivotSet)
+                .list();
+        List<SimpleProtein> spList = proteinList.stream()
+                .map(pivot -> new SimpleProtein(pivot.getId().getProteinChain().getIntId(), pivot.getId().getProteinChain().getGesamtId()))
+                .collect(Collectors.toList());
         session.getTransaction().commit();
-        return (List<Object>) (List<?>) proteinList;
+        return (List<Object>) (List<?>) spList;
     }
 
     // Object returned must be the same as pivot and qury and object
@@ -62,14 +74,16 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
     }
 
     public void storeObjectToDataset(Object metricObject, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
-        if (metricObject instanceof ProteinChain) {
-            ProteinChain proteinChain = (ProteinChain) metricObject;
-            Transaction transaction = session.beginTransaction();
-            session.save(proteinChain);
-            transaction.commit();
-        } else {
-            throw new IllegalArgumentException("metricObject must be an instance of ProteinChain");
-        }
+        //todo we need more information than just id, gesamtid to insert row into the db
+        return;
+//        if (metricObject instanceof SimpleProtein) {
+//            ProteinChain proteinChain = this.session.get(ProteinChain.class, ((SimpleProtein) metricObject).getIntId());
+//            Transaction transaction = session.beginTransaction();
+//            session.save(proteinChain);
+//            transaction.commit();
+//        } else {
+//            throw new IllegalArgumentException("metricObject must be an instance of ProteinChain");
+//        }
     }
 
     //todo typo
@@ -112,5 +126,27 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
 
     protected void updateDatasetSize(String datasetName, int count) {
 
+    }
+
+    public PivotSet getCurrentPivotSet() {
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<PivotSet> criteriaQuery = criteriaBuilder.createQuery(PivotSet.class);
+        Root<PivotSet> root = criteriaQuery.from(PivotSet.class);
+
+        criteriaQuery.select(root)
+                .where(criteriaBuilder.equal(root.get("currentlyUsed"), 1));
+
+        List<PivotSet> pivotSets = session.createQuery(criteriaQuery).getResultList();
+
+        if (!pivotSets.isEmpty()) {
+            if (pivotSets.size() > 1) {
+                //todo move to custom checked exception
+                throw new Error("Multiple active pivot sets, unrecoverable inconsistency");
+            }
+            PivotSet pivotSet = pivotSets.get(0);
+            return pivotSet;
+        } else {
+            throw new Error("No pivot set found with currentlyUsed = 1");
+        }
     }
 }
