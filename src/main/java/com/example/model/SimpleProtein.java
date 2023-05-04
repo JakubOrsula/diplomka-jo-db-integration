@@ -7,7 +7,6 @@ public class SimpleProtein {
     public SimpleProtein(int intId, String gesamtId) {
         this.intId = intId;
         this.gesamtId = gesamtId;
-        System.out.println(gesamtId);
     }
 
     public int getIntId() {

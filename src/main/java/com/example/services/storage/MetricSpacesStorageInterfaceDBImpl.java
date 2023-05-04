@@ -31,6 +31,7 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
 
         ScrollableResults results = session.createQuery("from ProteinChain").scroll(ScrollMode.FORWARD_ONLY);
         Iterator<SimpleProtein> iterator = new Iterator<SimpleProtein>() {
+            private long counter = 0;
             @Override
             public boolean hasNext() {
                 boolean hasNext = results.next();
@@ -44,6 +45,8 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
             @Override
             public SimpleProtein next() {
                 var pc = (ProteinChain) results.get(0);
+                counter++;
+                System.out.println("Got a protein " + counter);
                 return new SimpleProtein(pc.getIntId(), pc.getGesamtId());
             }
         };
@@ -148,5 +151,13 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         } else {
             throw new Error("No pivot set found with currentlyUsed = 1");
         }
+    }
+
+    public long getElgibleProteisForDistanceComputationCount() {
+        //todo more advanced logic, chainmetadata might contain empty distances
+        Long meta_count = (Long) session.createQuery("select count(*) from ProteinChainMetadata").uniqueResult();
+        Long protein_chain_count = (Long) session.createQuery("select count(*) from ProteinChain").uniqueResult();
+
+        return protein_chain_count;// - meta_count;
     }
 }

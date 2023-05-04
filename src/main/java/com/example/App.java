@@ -2,7 +2,7 @@ package com.example;
 
 import com.example.model.ProteinChain;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
-import com.example.services.distance.EvalAndStoreObjectsToPivotsDists;
+import com.example.services.distance.update.EvalAndStoreObjectsToPivotsDists;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
