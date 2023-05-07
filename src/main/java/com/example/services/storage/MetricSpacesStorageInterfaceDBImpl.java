@@ -4,9 +4,11 @@ import com.example.model.PivotSet;
 import com.example.model.Pivot512;
 import com.example.model.ProteinChain;
 import com.example.model.SimpleProtein;
+import com.example.services.configuration.AppConfig;
 import org.hibernate.*;
 import vm.metricSpace.MetricSpacesStorageInterface;
 
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -28,16 +30,16 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         // query all rows from the Protein table
         // todo maybe sort to make it deterministic
         session.beginTransaction();
-
-        ScrollableResults results = session.createQuery("from ProteinChain").scroll(ScrollMode.FORWARD_ONLY);
+        PivotSet pivotSet = getCurrentPivotSet();
+        //todo make adjusting this query atomic with the one in getElgibleProteisForDistanceComputationCount
+        var query = getChainsForComputationQuery(pivotSet);
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
         Iterator<SimpleProtein> iterator = new Iterator<SimpleProtein>() {
-            private long counter = 0;
             @Override
             public boolean hasNext() {
                 boolean hasNext = results.next();
                 if (!hasNext) {
                     results.close();
-                    session.close();
                 }
                 return hasNext;
             }
@@ -45,14 +47,38 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
             @Override
             public SimpleProtein next() {
                 var pc = (ProteinChain) results.get(0);
-                counter++;
-                System.out.println("Got a protein " + counter);
                 return new SimpleProtein(pc.getIntId(), pc.getGesamtId());
             }
         };
 
         session.getTransaction().commit();
         return (Iterator<Object>) (Iterator<?>) iterator;
+    }
+
+    public Long getChainsForComputationCountQuery(PivotSet pivotSet) {
+        return (Long) getChainsForComputationQuery(pivotSet, "select count(p)").getSingleResult();
+    }
+
+    private org.hibernate.query.Query getChainsForComputationQuery(PivotSet pivotSet) {
+        return getChainsForComputationQuery(pivotSet, "select p");
+    }
+
+    private org.hibernate.query.Query getChainsForComputationQuery(PivotSet pivotSet, String queryString) {
+        queryString += " from ProteinChain p left join ProteinChainMetadata pm on p.intId = pm.id.proteinChain.intId " +
+                "where (pm.id.proteinChain is null or " +
+                "((length(pm.pivotDistances) < 200 or p.added > pm.lastUpdate) and pm.id.pivotSet = :pivotSet))";
+        if (AppConfig.COMPUTE_CHAIN_FROM != -1 && AppConfig.COMPUTE_CHAIN_TO != -1) {
+            queryString += " and p.intId >= :chainFrom and p.intId <= :chainTo ";
+        } else { //order by size destroys concept of continuous intervals by id
+            queryString += " order by p.chainLength desc"; //ordering from biggest chains gives better estimates on max running time
+        }
+        var query = session.createQuery(queryString)
+                .setParameter("pivotSet", pivotSet);
+        if (AppConfig.COMPUTE_CHAIN_FROM != -1 && AppConfig.COMPUTE_CHAIN_TO != -1) {
+            query.setParameter("chainFrom", AppConfig.COMPUTE_CHAIN_FROM);
+            query.setParameter("chainTo", AppConfig.COMPUTE_CHAIN_TO);
+        }
+        return query;
     }
 
     public List<Object> getPivots(String pivotSetName, Object... params) {
@@ -151,13 +177,5 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         } else {
             throw new Error("No pivot set found with currentlyUsed = 1");
         }
-    }
-
-    public long getElgibleProteisForDistanceComputationCount() {
-        //todo more advanced logic, chainmetadata might contain empty distances
-        Long meta_count = (Long) session.createQuery("select count(*) from ProteinChainMetadata").uniqueResult();
-        Long protein_chain_count = (Long) session.createQuery("select count(*) from ProteinChain").uniqueResult();
-
-        return protein_chain_count;// - meta_count;
     }
 }

@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import com.example.model.Protein;
+import com.example.services.configuration.AppConfig;
 
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +55,7 @@ public class App
     }
 
     public static void migrate() {
-        //        todo .env file
+        //todo make this work
         System.out.println( "Hello World!" );
         Flyway flyway = Flyway.configure()
                 .dataSource("jdbc:mariadb://localhost:3306/protein_chain_db", "chain", "OneCha1n2RuleThem4ll")
@@ -89,11 +90,32 @@ public class App
         }
     }
 
+    private static final SessionFactory sessionFactory = buildSessionFactory();
+
+    private static SessionFactory buildSessionFactory() {
+        try {
+            Configuration configuration = new Configuration();
+
+            // Set the connection details from the configuration class
+            configuration.setProperty("hibernate.connection.url", AppConfig.HIBERNATE_CONNECTION_URL);
+            configuration.setProperty("hibernate.connection.username", AppConfig.HIBERNATE_CONNECTION_USERNAME);
+            configuration.setProperty("hibernate.connection.password", AppConfig.HIBERNATE_CONNECTION_PASSWORD);
+            configuration.configure("hibernate.cfg.xml");
+
+            return configuration.buildSessionFactory();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to build the SessionFactory.", e);
+        }
+    }
+
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
     public static void main( String[] args )
     {
-        try (SessionFactory sessionFactory = new Configuration()
-                .configure("hibernate.cfg.xml")
-                .buildSessionFactory();
+        try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
 
             var metricSpace = new AbstractMetricSpaceDBImpl();
@@ -103,7 +125,5 @@ public class App
             var evaluator = new EvalAndStoreObjectsToPivotsDists(session);
             evaluator.run(dataset);
         }
-
-
     }
 }

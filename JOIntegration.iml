@@ -61,13 +61,14 @@
     <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:3.23.0" level="project" />
     <orderEntry type="library" name="Maven: org.flywaydb:flyway-core:9.16.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.14.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.14.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.14.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.14.0" level="project" />
     <orderEntry type="library" name="Maven: javax.persistence:persistence-api:1.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-reload4j:2.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:2.0.5" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.reload4j:reload4j:1.2.22" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-math3:3.1.1" level="project" />
   </component>
 </module>

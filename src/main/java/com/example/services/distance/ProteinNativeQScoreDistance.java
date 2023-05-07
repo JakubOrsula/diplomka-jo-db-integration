@@ -34,9 +34,6 @@ public class ProteinNativeQScoreDistance implements Serializable {
             // make sure that jre can find it by placing e.g
             // env var LD_LIBRARY_PATH=/home/jakub/Documents/src/gesamt_distance/build/distance
             System.loadLibrary("ProteinDistance");
-            // parameter 0.6 is inherent parametr in C library that was examined to speed-up distance evaluation
-            // while well approximating the geometric similarity of protein structures
-            // todo undo the hardcoding of 0.6f
             init(gesamtLibraryPath);
         } catch (java.lang.UnsatisfiedLinkError | Exception ex) {
             LOG.log(Level.WARNING, "Initialization of the distance function not successfull.", ex);
@@ -58,7 +55,7 @@ public class ProteinNativeQScoreDistance implements Serializable {
         try {
             float[] ret = getStats(o1, o2, innerParameterOnSizeDiff);
             if (o1.equals(o2)) {
-                ret[0] = 1;
+                ret[0] = 1; // identity fix
             }
             return ret;
         } catch (Exception e) {

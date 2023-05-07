@@ -1,16 +1,17 @@
 package com.example.services.distance;
 
+import com.example.services.configuration.AppConfig;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
 public class DistanceFunctionInterfaceImpl<T> implements DistanceFunctionInterface<String> {
 
     public DistanceFunctionInterfaceImpl() {
-        ProteinNativeQScoreDistance.initDistance("/home/jakub/Documents/pdbe_data/PDBe_binary"); //todo to conf file
+        ProteinNativeQScoreDistance.initDistance(AppConfig.PDBE_BINARY_FILES_DIR);
     }
 
     @Override
     public float getDistance(String obj1, String obj2) {
-        var ret = ProteinNativeQScoreDistance.getStatsFloats(obj1, obj2, 0.6F);  //todo to some conf file
-        return ret[0];
+        var ret = ProteinNativeQScoreDistance.getStatsFloats(obj1, obj2, AppConfig.GESAMT_COMPUTATION_CUTOFF_THRESHOLD);
+        return 1-ret[0];
     }
 }
