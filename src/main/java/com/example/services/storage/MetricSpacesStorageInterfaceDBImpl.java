@@ -1,9 +1,6 @@
 package com.example.services.storage;
 
-import com.example.model.PivotSet;
-import com.example.model.Pivot512;
-import com.example.model.ProteinChain;
-import com.example.model.SimpleProtein;
+import com.example.model.*;
 import com.example.services.configuration.AppConfig;
 import org.hibernate.*;
 import vm.metricSpace.MetricSpacesStorageInterface;
@@ -13,9 +10,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+//todo most of this class is stupid because its paired to specific functionality required by abstract metric space and adding various quirks to stay compliant
+// the quirked methods should be moved to specialized loaders and only generic one should stay here
+
 
 public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInterface {
     private final Session session;
@@ -25,16 +27,15 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         this.session = session;
     }
 
-
-    public Iterator<Object> getObjectsFromDataset(String datasetName, Object... params) {
-        // query all rows from the Protein table
+    public Iterator<ProteinChainMetadata> getProteinChainMetadatas(String datasetName, Object... params) {
+        // todo add some display of x/y proteins sketches ca be computed based on missing distances
         // todo maybe sort to make it deterministic
         session.beginTransaction();
         PivotSet pivotSet = getCurrentPivotSet();
-        //todo make adjusting this query atomic with the one in getElgibleProteisForDistanceComputationCount
-        var query = getChainsForComputationQuery(pivotSet);
+        var queryString = "FROM ProteinChainMetadata WHERE pivotDistances IS NOT NULL and id.pivotSet = :pivotSet";
+        var query = session.createQuery(queryString, ProteinChainMetadata.class).setParameter("pivotSet", pivotSet);
         ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-        Iterator<SimpleProtein> iterator = new Iterator<SimpleProtein>() {
+        Iterator<ProteinChainMetadata> iterator = new Iterator<ProteinChainMetadata>() {
             @Override
             public boolean hasNext() {
                 boolean hasNext = results.next();
@@ -45,8 +46,51 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
             }
 
             @Override
+            public ProteinChainMetadata next() {
+                return (ProteinChainMetadata) results.get(0);
+            }
+        };
+
+        session.getTransaction().commit();
+        return iterator;
+    }
+
+    //todo this function is specialized just for computing distances
+    //todo this function needs to use indexedAsDataObject not to return pivots
+    public Iterator<Object> getObjectsFromDataset(String datasetName, Object... params) {
+        //apply limit
+        var limit = -1;
+        if (params.length > 0) {
+            limit = (int) params[0];
+        }
+
+        // query all rows from the Protein table
+        // todo maybe sort to make it deterministic
+        session.beginTransaction();
+        PivotSet pivotSet = getCurrentPivotSet();
+        //todo make adjusting this query atomic with the one in getElgibleProteisForDistanceComputationCount
+        var query = getChainsForComputationQuery(pivotSet);
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+        int finalLimit = limit;
+        Iterator<SimpleProtein> iterator = new Iterator<SimpleProtein>() {
+            private int retrieved = 0;
+            @Override
+            public boolean hasNext() {
+                //todo sql limit might be better so we dont over-fetch
+                if (retrieved == finalLimit) {
+                    return false;
+                }
+                boolean hasNext = results.next();
+                if (!hasNext) {
+                    results.close();
+                }
+                return hasNext;
+            }
+
+            @Override
             public SimpleProtein next() {
                 var pc = (ProteinChain) results.get(0);
+                retrieved++;
                 return new SimpleProtein(pc.getIntId(), pc.getGesamtId());
             }
         };
@@ -81,6 +125,23 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         return query;
     }
 
+    //todo add test
+    private <T> List<T> getEveryNBasedOnLimit(List<T> inputList, int limit) {
+        if (inputList.size() % limit != 0) {
+            throw new IllegalArgumentException("Input list size is not divisible by the limit.");
+        }
+
+        List<T> result = new ArrayList<>();
+
+        int x = inputList.size() / limit;
+
+        for (int i = 0; i < inputList.size(); i += x) {
+            result.add(inputList.get(i));
+        }
+
+        return result;
+    }
+
     public List<Object> getPivots(String pivotSetName, Object... params) {
         //todo get only current pivots based on pivotSet
         //todo the current pivotset should be locked in redis
@@ -94,6 +155,10 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
                 .map(pivot -> new SimpleProtein(pivot.getId().getProteinChain().getIntId(), pivot.getId().getProteinChain().getGesamtId()))
                 .collect(Collectors.toList());
         session.getTransaction().commit();
+
+        if (params.length > 0) {
+            spList = getEveryNBasedOnLimit(spList, (int) params[0]);
+        }
         return (List<Object>) (List<?>) spList;
     }
 

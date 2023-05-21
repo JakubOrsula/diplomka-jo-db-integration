@@ -31,9 +31,9 @@ public class EvalAndStoreObjectsToPivotsDists {
 
     public static final Logger LOGGER = Logger.getLogger(EvalAndStoreObjectsToPivotsDists.class.getName());
 
-    private final int maxQSize = 1024;
-    private final int maxDBBufferSize = 100; //todo both to env
-    private LinkedBlockingQueue<EvaluationResult> queue = new LinkedBlockingQueue<>(maxQSize);
+    private final int maxQSize = AppConfig.CONSUMER_BUFFER_SIZE * 10;
+    private final int maxDBBufferSize = AppConfig.CONSUMER_BUFFER_SIZE;
+    private final LinkedBlockingQueue<EvaluationResult> queue = new LinkedBlockingQueue<>(maxQSize);
 
 
     private void compareWithResultInDb(EvaluationResult res, PivotSet currentPivotSet) {

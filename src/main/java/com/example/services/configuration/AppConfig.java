@@ -35,6 +35,7 @@ public class AppConfig {
     public static final boolean DRY_RUN = Boolean.parseBoolean(properties.getProperty("DRY_RUN"));
     public static final String PDBE_BINARY_FILES_DIR = properties.getProperty("PDBE_BINARY_FILES_DIR");
     public static final float GESAMT_COMPUTATION_CUTOFF_THRESHOLD = Float.parseFloat(properties.getProperty("GESAMT_COMPUTATION_CUTOFF_THRESHOLD"));
+    public static final int CONSUMER_BUFFER_SIZE = Integer.parseInt(properties.getProperty("CONSUMER_BUFFER_SIZE"));
     /*
     Following two variables are used to limit protein chain distance computation to limited set of ids.
     This allows running this program on multiple PCs, connected to same database, better pallelizing the workload.
