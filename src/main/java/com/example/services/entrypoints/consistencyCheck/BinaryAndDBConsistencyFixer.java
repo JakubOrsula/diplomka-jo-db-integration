@@ -1,4 +1,4 @@
-package com.example.services.storage;
+package com.example.services.entrypoints.consistencyCheck;
 
 import com.example.model.ProteinChain;
 import com.example.services.configuration.AppConfig;
@@ -17,19 +17,20 @@ public class BinaryAndDBConsistencyFixer {
         this.session = session;
     }
 
-    public void removeProteinChainsWithoutFile(boolean dry_run) {
-        ScrollableResults results = session.createQuery("from ProteinChain").scroll(ScrollMode.FORWARD_ONLY);
+    public void removeProteinChainsWithoutFile(boolean dryRun) {
+        ScrollableResults results = session.createQuery("from ProteinChain where indexedAsDataObject = true").scroll(ScrollMode.FORWARD_ONLY);
         var total = 0;
-        var pivots = 0;
         var totalMissing = 0;
         while (results.next()) {
             total += 1;
+            if (total % 1000 == 0) {
+                System.out.println("Processed " + total / 1000 + "k chains");
+            }
             ProteinChain proteinChain = (ProteinChain) results.get(0);
 
             String gesamtId = proteinChain.getGesamtId();
             //skip pivots
             if (gesamtId.startsWith("@")) {
-                pivots += 1;
                 continue;
             }
             String fileName =
@@ -40,20 +41,21 @@ public class BinaryAndDBConsistencyFixer {
             File file = new File(fileName);
             if (!file.exists()) {
                 totalMissing += 1;
-                if (dry_run) {
-                    System.out.println(fileName + " not found");
+                System.out.println(fileName + " not found");
+                if (dryRun) {
+
                 } else {
-                    session.delete(proteinChain);
-                    session.flush();
-                    session.clear();
+                    session.beginTransaction();
+                    proteinChain.setIndexedAsDataObject(false);
+                    session.getTransaction().commit();
                 }
             }
         }
         System.out.println(totalMissing + "/" + total + " missing");
-        System.out.println(pivots + " pivots skipped");
     }
 
-    public void checkGesamtIdInDatabase(File rootDirectory) {
+    //todo this does not currently consider that we are skipping chains shorter than 10 atoms
+    public void CheckGesamtFilesAreInDB(File rootDirectory) {
         Deque<File> stack = new LinkedList<>();
         stack.push(rootDirectory);
 
@@ -67,7 +69,10 @@ public class BinaryAndDBConsistencyFixer {
                 if (files != null) {
                     for (File file : files) {
                         if (file.isFile()) {
-                            totalFiles++; // Increment total files counter
+                            totalFiles++;
+                            if (totalFiles % 1000 == 0) {
+                                System.out.println("Processed " + totalFiles/1000 + "k files");
+                            }
 
                             String fileName = file.getName();
                             String gesamtId = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -78,7 +83,7 @@ public class BinaryAndDBConsistencyFixer {
 
                             if (proteinChain == null) {
                                 missingFiles++;
-                                // Perform desired operations if gesamtId is not in the database
+
                                 System.out.println("GesamtId " + gesamtId + " not found in the database. File: " + fileName);
                             }
                         } else if (file.isDirectory()) {

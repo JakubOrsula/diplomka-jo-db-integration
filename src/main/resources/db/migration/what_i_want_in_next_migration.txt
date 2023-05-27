@@ -1,0 +1,2 @@
+indexes for everything
+unique pivotset, sketchBitOrder for pivotPairs

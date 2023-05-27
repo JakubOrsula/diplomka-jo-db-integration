@@ -1,4 +1,4 @@
-package com.example;
+package com.example.services.entrypoints;
 
 import vm.metricSpace.AbstractMetricSpace;
 import vm.metricSpace.Dataset;

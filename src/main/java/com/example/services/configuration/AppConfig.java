@@ -32,8 +32,11 @@ public class AppConfig {
         }
     }
 
-    public static final boolean DRY_RUN = Boolean.parseBoolean(properties.getProperty("DRY_RUN"));
+    /** COMMON **/
+    public static final boolean DRY_RUN = Boolean.parseBoolean(properties.getProperty("DRY_RUN")); //todo replace with args
     public static final String PDBE_BINARY_FILES_DIR = properties.getProperty("PDBE_BINARY_FILES_DIR");
+
+    /** DISTANCE **/
     public static final float GESAMT_COMPUTATION_CUTOFF_THRESHOLD = Float.parseFloat(properties.getProperty("GESAMT_COMPUTATION_CUTOFF_THRESHOLD"));
     public static final int CONSUMER_BUFFER_SIZE = Integer.parseInt(properties.getProperty("CONSUMER_BUFFER_SIZE"));
     /*
@@ -44,9 +47,17 @@ public class AppConfig {
      */
     public static final int COMPUTE_CHAIN_FROM = Integer.parseInt(properties.getProperty("COMPUTE_CHAIN_FROM"));
     public static final int COMPUTE_CHAIN_TO = Integer.parseInt(properties.getProperty("COMPUTE_CHAIN_TO"));
+
+    /** HIBERNATE **/
     public static final String HIBERNATE_CONNECTION_URL = properties.getProperty("hibernate.connection.url");
     public static final String HIBERNATE_CONNECTION_USERNAME = properties.getProperty("hibernate.connection.username");
     public static final String HIBERNATE_CONNECTION_PASSWORD = properties.getProperty("hibernate.connection.password");
 
-
+    /** SKETCH LEARNING **/
+    // Use freely to find suitable correlations, Mic used 100 000.
+    public static final int SKETCH_LEARNING_SAMPLE_SIZE = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SAMPLE_SIZE"));
+    // Number of bits used for sketch. Mic used 64 and 1024. Determines how long the operations with sketches will take.
+    public static final int SKETCH_LEARNING_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SKETCH_LENGTH"));
+    // What should be the ratio of 1s to 0s in one column of the matrix? Mic used 0.5 - meaning same count of 1s and 0s
+    public static final float SKETCH_LEARNING_BALANCE = Float.parseFloat(properties.getProperty("SKETCH_LEARNING_BALANCE"));
 }

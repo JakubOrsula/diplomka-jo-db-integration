@@ -1,14 +1,17 @@
 package com.example.services.distance.update;
 
-import com.example.App;
+import com.example.dao.PivotSetDao;
+import com.example.dao.ProteinChainForDistanceDao;
 import com.example.model.PivotSet;
 import com.example.model.ProteinChain;
 import com.example.model.ProteinChainMetadata;
 import com.example.model.json.Converter;
 import com.example.model.json.DistsMetadata;
+import com.example.service.PivotSetService;
+import com.example.service.distance.ProteinChainService;
 import com.example.services.configuration.AppConfig;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
-import com.example.services.utils.MapComparator;
+import com.example.services.utils.MapUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hibernate.Session;
 import vm.metricSpace.Dataset;
@@ -24,9 +27,11 @@ import java.util.stream.StreamSupport;
 public class EvalAndStoreObjectsToPivotsDists {
 
     private final Session session;
+    private final PivotSetService pivotSetService;
 
-    public EvalAndStoreObjectsToPivotsDists(Session session) {
+    public EvalAndStoreObjectsToPivotsDists(Session session, PivotSetService pivotSetService) {
         this.session = session;
+        this.pivotSetService = pivotSetService;
     }
 
     public static final Logger LOGGER = Logger.getLogger(EvalAndStoreObjectsToPivotsDists.class.getName());
@@ -49,7 +54,7 @@ public class EvalAndStoreObjectsToPivotsDists {
         try {
             var new_json = Converter.fromJsonString(res.metadata).getDists();
             var saved_json = Converter.fromJsonString(pmc.getPivotDistances()).getDists();
-            if (!MapComparator.compareMaps(new_json, saved_json)) {
+            if (!MapUtils.compareMaps(new_json, saved_json)) {
                 System.out.println("Maps are nor the same for protein: " + res.proteinChainIntId + ", " + proteinChain.getGesamtId() + ", picotSet: " + currentPivotSet.getId());
             }
         } catch (IOException e) {
@@ -74,13 +79,13 @@ public class EvalAndStoreObjectsToPivotsDists {
 
     private void consumeResults() {
         System.out.println("Initializing consumer");
-        var storage = new MetricSpacesStorageInterfaceDBImpl(session);
-        var currentPivotSet = storage.getCurrentPivotSet();
-        var elgibleChainCount = storage.getChainsForComputationCountQuery(currentPivotSet);
+        var proteinChainService = new ProteinChainService(new PivotSetService(new PivotSetDao(session)), new ProteinChainForDistanceDao(session));
+        var currentPivotSet = pivotSetService.GetCurrentPivotSet();
+        var elgibleChainCount = proteinChainService.getChainsCount();
         var soFarProcessedChains = 0L;
         var averageRunningTimePerChain = 0.0;
         var averageRunningTimePerChunk = 0.0;
-        var soFarProcessedChunksCount = 1;
+        var soFarProcessedChunksCount = 1L;
         boolean last_element_encountered = false;
 
         while (!last_element_encountered) {
@@ -148,16 +153,16 @@ public class EvalAndStoreObjectsToPivotsDists {
     }
 
 
-    public void run(Dataset<String> dataset) {
+    public void run(Dataset<String> dataset) { //todo loose the dataset and use your own beautiful functions
         System.out.println("Preparing data for computation...");
         int pivotCount = 512;
         var metricSpace = dataset.getMetricSpace();
         var df = dataset.getDistanceFunction();
         Thread backgroundConsumerThread = new Thread(this::consumeResults);
-        var storage = new MetricSpacesStorageInterfaceDBImpl(session);
+        var proteinChainService = new ProteinChainService(new PivotSetService(new PivotSetDao(session)), new ProteinChainForDistanceDao(session));
         var pivots = dataset.getPivotsForTheSameDataset(pivotCount);
         var proteins = dataset.getMetricObjectsFromDataset();
-        var elgibleChainCount = storage.getChainsForComputationCountQuery(storage.getCurrentPivotSet());
+        var elgibleChainCount = proteinChainService.getChainsCount();
         Stream<Object> proteinStream = StreamSupport.stream(Spliterators.spliterator(proteins,
                 elgibleChainCount,
                 Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.SIZED),
@@ -167,7 +172,7 @@ public class EvalAndStoreObjectsToPivotsDists {
         backgroundConsumerThread.start();
         proteinStream.forEach(o -> {
             var startedAt = System.currentTimeMillis();
-            int oId = (int) metricSpace.getIDOfMetricObject(o);
+            int oId = Integer.parseInt((String) metricSpace.getIDOfMetricObject(o));
             Object oData = metricSpace.getDataOfMetricObject(o);
             var distMap = new HashMap<String, Double>();
             var distanceValid = true;

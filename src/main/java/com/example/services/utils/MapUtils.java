@@ -2,7 +2,7 @@ package com.example.services.utils;
 
 import java.util.Map;
 
-public class MapComparator {
+public class MapUtils {
     private static final double DELTA = 0.0001;
 
     //todo add verbosity flag
