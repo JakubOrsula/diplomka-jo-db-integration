@@ -13,5 +13,6 @@
         <mapping class="com.example.model.Pivot512"/>
         <mapping class="com.example.model.PivotSet"/>
         <mapping class="com.example.model.ProteinChainMetadata"/>
+        <mapping class="com.example.model.PivotPairsFor64pSketches"/>
     </session-factory>
 </hibernate-configuration>

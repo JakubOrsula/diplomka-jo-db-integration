@@ -16,8 +16,8 @@ public class PivotPairsFor64pSketchesDao {
 
     public long pairsCount(PivotSet pivotSet) {
         session.beginTransaction();
-        var parisCount = session.createQuery("SELECT count(*) from PivotPairsFor64pSketches where id.pivotSet = :pivotSet", Long.class)
-                .setParameter("pivotSet", pivotSet)
+        var parisCount = session.createQuery("SELECT count(*) from PivotPairsFor64pSketches where id.pivotSetId = :pivotSetId", Long.class)
+                .setParameter("pivotSetId", pivotSet.getId())
                 .getSingleResult();
         session.getTransaction().commit();
         return parisCount;
@@ -30,18 +30,14 @@ public class PivotPairsFor64pSketchesDao {
             Pivot512 pivot1 = pivots.get(i);
             Pivot512 pivot2 = pivots.get(i + 1);
 
-            PivotPairsFor64pSketches pivotPair = new PivotPairsFor64pSketches();
-            PivotPairsFor64pSketches.PivotPairsFor64pSketchesId pairId = new PivotPairsFor64pSketches.PivotPairsFor64pSketchesId();
-
-            pairId.setPivotSet(pivotSet);
-            pairId.setSketchBitOrder((short) i);
-            pairId.setPivot1(pivot1);
-            pairId.setPivot2(pivot2);
-
-            pivotPair.setId(pairId);
-            session.save(pivotPair);
+            String sql = "insert into protein_chain_db.pivotPairsFor64pSketches values (:pivotSetId, :sketchBitOrder, :pivot1Id, :pivot2Id)";
+            int affectedRows = session.createNativeQuery(sql)
+                    .setParameter("pivotSetId", pivotSet.getId())
+                    .setParameter("sketchBitOrder", (short) i)
+                    .setParameter("pivot1Id", pivot1.getId().getProteinChain().getIntId())
+                    .setParameter("pivot2Id", pivot2.getId().getProteinChain().getIntId())
+                    .executeUpdate();
         }
-
         session.getTransaction().commit();
     }
 }

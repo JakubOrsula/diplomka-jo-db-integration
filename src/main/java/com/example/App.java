@@ -3,6 +3,7 @@ package com.example;
 import com.beust.jcommander.JCommander;
 import com.example.services.configuration.AppConfig;
 import com.example.services.configuration.Args;
+import com.example.services.entrypoints.applySketches.ApplySketches;
 import com.example.services.entrypoints.consistencyCheck.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
@@ -68,6 +69,10 @@ public class App
         LearnSketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
     }
 
+    private static void applySketches() {
+        ApplySketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
+    }
+
     //todo normal runner
     public static void main(String[] args) {
         Args arguments = new Args();
@@ -83,6 +88,7 @@ public class App
             case "slowChecks" -> slowChecks(arguments.dryRun);
             case "computeDistances" -> computeDistances();
             case "learnSketches" -> learnSketches();
+            case "applySketches" -> applySketches();
             default ->
                     System.out.println("Invalid function name passed. Please check the function name and try again.");
         }

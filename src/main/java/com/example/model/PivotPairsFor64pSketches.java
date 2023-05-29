@@ -21,28 +21,41 @@ public class PivotPairsFor64pSketches {
     @Embeddable
     public static class PivotPairsFor64pSketchesId implements Serializable {
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "pivotSetId")
-        private PivotSet pivotSet;
+        public int getPivotSetId() {
+            return pivotSetId;
+        }
+
+        public void setPivotSetId(int pivotSetId) {
+            this.pivotSetId = pivotSetId;
+        }
+
+        public int getPivot1Id() {
+            return pivot1Id;
+        }
+
+        public void setPivot1Id(int pivot1Id) {
+            this.pivot1Id = pivot1Id;
+        }
+
+        public void setPivot2Id(int pivot12Id) {
+            this.pivot2Id = pivot2Id;
+        }
+
+        public int getPivot2Id() {
+            return pivot2Id;
+        }
+
+        @Column(name = "pivotSetId", insertable = false, updatable = false)
+        private int pivotSetId;
 
         @Column(name = "sketchBitOrder")
         private short sketchBitOrder;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "pivot1")
-        private Pivot512 pivot1;
+        @Column(name = "pivot1")
+        private int pivot1Id;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "pivot2")
-        private Pivot512 pivot2;
-
-        public PivotSet getPivotSet() {
-            return pivotSet;
-        }
-
-        public void setPivotSet(PivotSet pivotSet) {
-            this.pivotSet = pivotSet;
-        }
+        @Column(name = "pivot2")
+        private int pivot2Id;
 
         public short getSketchBitOrder() {
             return sketchBitOrder;
@@ -52,23 +65,6 @@ public class PivotPairsFor64pSketches {
             this.sketchBitOrder = sketchBitOrder;
         }
 
-        public Pivot512 getPivot1() {
-            return pivot1;
-        }
 
-        public void setPivot1(Pivot512 pivot1) {
-            this.pivot1 = pivot1;
-        }
-
-        public Pivot512 getPivot2() {
-            return pivot2;
-        }
-
-        public void setPivot2(Pivot512 pivot2) {
-            this.pivot2 = pivot2;
-        }
-
-        // todo Override equals and hashCode methods
-        // ...
     }
 }

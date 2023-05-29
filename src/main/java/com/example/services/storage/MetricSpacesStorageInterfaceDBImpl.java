@@ -9,6 +9,8 @@ import org.hibernate.Session;
 import org.hibernate.cfg.NotYetImplementedException;
 import vm.metricSpace.MetricSpacesStorageInterface;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,8 +45,9 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
     }
 
     // Object returned must be the same as pivot and query and object
+    // todo we are not handling queryobjects currently
     public List<Object> getQueryObjects(String querySetName, Object... params) {
-        return null;
+        return new ArrayList<>();
     }
 
     public void storeObjectToDataset(Object metricObject, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
@@ -61,7 +64,8 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
     }
 
     public void storePivots(List<Object> pivots, String pivotSetName, Object... additionalParamsToStoreWithNewPivotSet) {
-        throw new NotYetImplementedException("pivotsets are created using python scripts");
+//        throw new NotYetImplementedException("pivotsets are created using python scripts");
+        //todo why do we need to store the pivots explicitly?
     }
 
     public void storeQueryObjects(List<Object> queryObjs, String querySetName, Object... additionalParamsToStoreWithNewQuerySet) {

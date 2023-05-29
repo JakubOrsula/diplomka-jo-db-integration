@@ -19,8 +19,8 @@ public class PivotDao {
     public List<Pivot512> getPivots(PivotSet pivotSet) {
         session.beginTransaction();
         //todo in addition to this db design being stupid and using compound keys, we need to sort because the lib is relying on this returning same results upon multiple calls
-        List<Pivot512> pivotList = session.createQuery("select p from Pivot512 p join p.id.pivotSet ps where ps = :pivotSet order by p.id.proteinChain.id", Pivot512.class)
-                .setParameter("pivotSet", pivotSet)
+        List<Pivot512> pivotList = session.createQuery("select p from Pivot512 p where p.id.pivotSet.id = :pivotSetId order by p.id.proteinChain.intId", Pivot512.class)
+                .setParameter("pivotSetId", pivotSet.getId())
                 .list();
         session.getTransaction().commit();
         return pivotList;

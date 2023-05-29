@@ -60,4 +60,7 @@ public class AppConfig {
     public static final int SKETCH_LEARNING_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SKETCH_LENGTH"));
     // What should be the ratio of 1s to 0s in one column of the matrix? Mic used 0.5 - meaning same count of 1s and 0s
     public static final float SKETCH_LEARNING_BALANCE = Float.parseFloat(properties.getProperty("SKETCH_LEARNING_BALANCE"));
+
+    /** APPLY SKETCHES **/
+    public static final int SKETCH_APPLY_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_APPLY_SKETCH_LENGTH"));
 }
