@@ -11,6 +11,8 @@ import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.io.IOException;
+
 /**
  * Hello world!
  *
@@ -66,7 +68,11 @@ public class App
     }
 
     private static void learnSketches() {
-        LearnSketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
+        try {
+            LearnSketches.run();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void applySketches() {
@@ -81,6 +87,7 @@ public class App
                 .build()
                 .parse(args);
 
+        AppConfig.DRY_RUN = arguments.dryRun;
 
         //todo add dry run support
         switch (arguments.runFunction) {

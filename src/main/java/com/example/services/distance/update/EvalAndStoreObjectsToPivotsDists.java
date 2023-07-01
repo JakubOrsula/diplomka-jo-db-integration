@@ -160,7 +160,7 @@ public class EvalAndStoreObjectsToPivotsDists {
         var df = dataset.getDistanceFunction();
         Thread backgroundConsumerThread = new Thread(this::consumeResults);
         var proteinChainService = new ProteinChainService(new PivotSetService(new PivotSetDao(session)), new ProteinChainForDistanceDao(session));
-        var pivots = dataset.getPivotsForTheSameDataset(pivotCount);
+        var pivots = dataset.getPivots(pivotCount);
         var proteins = dataset.getMetricObjectsFromDataset();
         var elgibleChainCount = proteinChainService.getChainsCount();
         Stream<Object> proteinStream = StreamSupport.stream(Spliterators.spliterator(proteins,

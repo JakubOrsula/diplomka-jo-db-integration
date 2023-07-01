@@ -15,14 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInterface {
-    private final Session session;
     private final PivotService pivotService;
     private final ProteinChainService proteinChainService;
 
 
-    public MetricSpacesStorageInterfaceDBImpl(Session session, PivotService pivotService, ProteinChainService proteinChainService) {
+    public MetricSpacesStorageInterfaceDBImpl(PivotService pivotService, ProteinChainService proteinChainService) {
         super();
-        this.session = session;
         this.pivotService = pivotService;
         this.proteinChainService = proteinChainService;
     }
@@ -63,7 +61,11 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
 //        }
     }
 
+    //todo used just for applying sketches
+    // move to dao and and for everything besides applying sketches throw an exception
+    // mic - nepotrebne ukladat pivoty
     public void storePivots(List<Object> pivots, String pivotSetName, Object... additionalParamsToStoreWithNewPivotSet) {
+
 //        throw new NotYetImplementedException("pivotsets are created using python scripts");
         //todo why do we need to store the pivots explicitly?
     }

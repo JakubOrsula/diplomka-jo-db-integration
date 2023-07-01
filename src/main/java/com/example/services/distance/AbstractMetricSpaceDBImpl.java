@@ -1,13 +1,18 @@
 package com.example.services.distance;
 
-import com.example.model.ProteinChain;
 import com.example.model.SimpleProtein;
 import vm.metricSpace.AbstractMetricSpace;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
 public class AbstractMetricSpaceDBImpl extends AbstractMetricSpace<String> {
+    private final DistanceFunctionInterface<String> distanceFunctionInstance;
+
+    public AbstractMetricSpaceDBImpl(DistanceFunctionInterface<String> distanceFunctionInstance) {
+        this.distanceFunctionInstance = distanceFunctionInstance;
+    }
+
     public DistanceFunctionInterface<String> getDistanceFunctionForDataset(String datasetName, Object... params) {
-        return new DistanceFunctionInterfaceImpl<String>();
+        return distanceFunctionInstance;
     }
 
     public Object getIDOfMetricObject(Object o) {

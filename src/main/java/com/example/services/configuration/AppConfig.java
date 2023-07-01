@@ -33,7 +33,7 @@ public class AppConfig {
     }
 
     /** COMMON **/
-    public static final boolean DRY_RUN = Boolean.parseBoolean(properties.getProperty("DRY_RUN")); //todo replace with args
+    public static boolean DRY_RUN;
     public static final String PDBE_BINARY_FILES_DIR = properties.getProperty("PDBE_BINARY_FILES_DIR");
 
     /** DISTANCE **/
@@ -58,6 +58,8 @@ public class AppConfig {
     public static final int SKETCH_LEARNING_SAMPLE_SIZE = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SAMPLE_SIZE"));
     // Number of bits used for sketch. Mic used 64 and 1024. Determines how long the operations with sketches will take.
     public static final int SKETCH_LEARNING_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SKETCH_LENGTH"));
+    // Number of pivots to find suitable pairs
+    public static final int SKETCH_LEARNING_PIVOTS_COUNT = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_PIVOTS_COUNT"));
     // What should be the ratio of 1s to 0s in one column of the matrix? Mic used 0.5 - meaning same count of 1s and 0s
     public static final float SKETCH_LEARNING_BALANCE = Float.parseFloat(properties.getProperty("SKETCH_LEARNING_BALANCE"));
 

@@ -7,6 +7,7 @@ import com.example.service.PivotService;
 import com.example.service.PivotSetService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
+import com.example.services.distance.DistanceFunctionInterfaceImpl;
 import com.example.services.distance.update.EvalAndStoreObjectsToPivotsDists;
 import com.example.services.entrypoints.DatasetImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
@@ -20,11 +21,11 @@ public class DistanceComputation {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
 
-            var metricSpace = new AbstractMetricSpaceDBImpl();
+            var metricSpace = new AbstractMetricSpaceDBImpl(new DistanceFunctionInterfaceImpl<String>());
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
             var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForDistanceDao(session));
-            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(session, pivotService, proteinChainService);
+            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService);
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
             var evaluator = new EvalAndStoreObjectsToPivotsDists(session, pivotSetService);
             evaluator.run(dataset);

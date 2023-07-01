@@ -4,8 +4,9 @@ import com.example.model.Pivot512;
 import com.example.model.PivotPairsFor64pSketches;
 import com.example.model.ProteinChain;
 import com.example.model.SimpleProtein;
-import com.example.service.PivotPairsFor64pSketchesService;
+import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotSetService;
+import com.example.services.configuration.AppConfig;
 import org.hibernate.Session;
 import vm.metricSpace.AbstractMetricSpace;
 import vm.objTransforms.storeLearned.GHPSketchingPivotPairsStoreInterface;
@@ -15,21 +16,20 @@ import java.util.List;
 public class GHPSketchesPivotPairsStorageDBImpl implements GHPSketchingPivotPairsStoreInterface {
 
     private final Session session; //todo dont use session directly use the Service
-    private final PivotPairsFor64pSketchesService pivotPairsFor64pSketchesService;
+    private final PivotPairsForXpSketchesService pivotPairsForXpSketchesService;
     private final PivotSetService pivotSetService;
 
 
-    public GHPSketchesPivotPairsStorageDBImpl(Session session, PivotPairsFor64pSketchesService pivotPairsFor64pSketchesService, PivotSetService pivotSetService) {
-
+    public GHPSketchesPivotPairsStorageDBImpl(Session session, PivotPairsForXpSketchesService pivotPairsForXpSketchesService, PivotSetService pivotSetService) {
         this.session = session;
-        this.pivotPairsFor64pSketchesService = pivotPairsFor64pSketchesService;
+        this.pivotPairsForXpSketchesService = pivotPairsForXpSketchesService;
         this.pivotSetService = pivotSetService;
     }
 
     @Override
     public void storeSketching(String resultName, AbstractMetricSpace<Object> metricSpace, List<Object> pivots, Object... additionalInfoToStoreWithLearningSketching) {
         // sketchbitorder1-pivot1, sketchbitorder1-pivot2, sketchbitorder2-pivot1, sketchbitorder2pivot2
-        System.out.println("Saving " + pivots.size() + " pivots");
+        System.out.println("Saving " + pivots.size() / 2 + " pivots");
         var currentPivotSet = pivotSetService.GetCurrentPivotSet();
         //todo as the simpleproteins already got all the info needed we can skip this step
         var pivotList = pivots.stream().map(o -> {
@@ -43,7 +43,9 @@ public class GHPSketchesPivotPairsStorageDBImpl implements GHPSketchingPivotPair
             var pivot = session.get(Pivot512.class, pivotId);
             return pivot;
         }).toList();
-        pivotPairsFor64pSketchesService.storePairs(pivotList);
+        if (!AppConfig.DRY_RUN) {
+            pivotPairsForXpSketchesService.storePairs(pivotList);
+        }
         System.out.println("Saved");
     }
 

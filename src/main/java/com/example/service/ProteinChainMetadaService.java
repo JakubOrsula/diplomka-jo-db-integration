@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dao.ProteinChainMetadataDao;
+import com.example.dao.ProteinDataDao;
 import com.example.model.PivotSet;
 import com.example.model.ProteinChainMetadata;
 
@@ -18,6 +19,17 @@ public class ProteinChainMetadaService {
     public Iterator<ProteinChainMetadata> getProteinChainMetadatas() {
         PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
         return proteinChainMetadataDao.getProteinChainMetadatasWithValidDistances(pivotSet);
+    }
+
+    public Iterator<String> getProteinChainDistances() {
+        PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
+        //todo rename jazykolam
+        return proteinChainMetadataDao.getProteinDistancesWithValidDistances(pivotSet);
+    }
+    public Iterator<ProteinDataDao> getProteinChainDistancesData() {
+        PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
+        //todo rename jazykolam
+        return proteinChainMetadataDao.getProteinDataWithValidDistances(pivotSet);
     }
 
     }

@@ -15,10 +15,11 @@ public class ProteinChainForLearningSketchesDao extends ProteinChainDao {
     protected org.hibernate.query.Query getChainsCoreQuery(PivotSet pivotSet, String queryString) {
         // todo the requirement for distances to be up to date was dropped
         // if we really only want _valid_ distances we should first run the consistency check
-        // and use indexedAsDataObject true here
-        queryString += " from ProteinChain p join ProteinChainMetadata pm on p.intId = pm.id.proteinChain.intId " +
-                "where (pm.id.proteinChain is not null or " +
-                "((length(pm.pivotDistances) < 200) and pm.id.pivotSet = :pivotSet))";
+        queryString += " from ProteinChain p inner join ProteinChainMetadata pm on p.intId = pm.id.proteinChain.intId " +
+                "where length(pm.pivotDistances) > 200 " +
+                "and pm.id.pivotSet = :pivotSet " +
+                "and p.indexedAsDataObject = true " +
+                "order by p.intId";
         return session.createQuery(queryString)
                 .setParameter("pivotSet", pivotSet);
     }
