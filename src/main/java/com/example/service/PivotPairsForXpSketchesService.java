@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.dao.PivotPairsForXpSketchesDao;
 import com.example.model.Pivot512;
+import com.example.model.PivotPairsFor64pSketches;
 import com.example.model.PivotSet;
 import com.example.services.configuration.AppConfig;
 
@@ -36,5 +37,13 @@ public class PivotPairsForXpSketchesService {
         }
         PivotSet pivotSet =  pivotSetService.GetCurrentPivotSet();
         pivotPairsForXpSketchesDao.storePairs(pivotSet, pivots, tableNameBasedOnPivotCount());
+    }
+
+    public List<String[]> loadPivotPairsIDs() {
+        if (pairsCount() == 0) {
+            throw new IllegalArgumentException("No sketches for current pivot set.");
+        }
+        PivotSet pivotSet =  pivotSetService.GetCurrentPivotSet();
+        return pivotPairsForXpSketchesDao.loadPairs(pivotSet, tableNameBasedOnPivotCount());
     }
 }

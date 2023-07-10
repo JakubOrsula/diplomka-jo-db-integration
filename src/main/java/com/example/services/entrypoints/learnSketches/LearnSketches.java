@@ -1,12 +1,10 @@
 package com.example.services.entrypoints.learnSketches;
 
-import com.example.dao.PivotDao;
-import com.example.dao.PivotPairsForXpSketchesDao;
-import com.example.dao.PivotSetDao;
-import com.example.dao.ProteinChainForLearningSketchesDao;
+import com.example.dao.*;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
+import com.example.service.ProteinChainMetadaService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.configuration.AppConfig;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
@@ -20,7 +18,6 @@ import vm.objTransforms.learning.LearnSketchingGHP;
 import vm.objTransforms.storeLearned.GHPSketchingPivotPairsStoreInterface;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static com.example.App.getSessionFactory;
 
@@ -41,7 +38,8 @@ public class LearnSketches {
             var metricSpace = new AbstractMetricSpaceDBImpl(distanceFunction);
             //we don't want the code to interact directly with db
             var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForLearningSketchesDao(session));
-            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService);
+            var proteinChainMetadaService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), pivotSetService);
+            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService, proteinChainMetadaService);
 
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
 

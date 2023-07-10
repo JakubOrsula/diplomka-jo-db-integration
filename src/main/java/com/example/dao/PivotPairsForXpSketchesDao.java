@@ -5,7 +5,10 @@ import com.example.model.PivotSet;
 import org.hibernate.Session;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PivotPairsForXpSketchesDao {
     private final Session session;
@@ -24,6 +27,11 @@ public class PivotPairsForXpSketchesDao {
     }
 
     public void storePairs(PivotSet pivotSet, List<Pivot512> pivots, String storageTableName) {
+        /*
+        We get pairs of pivots so the list is actually double the size of final row count in DB.
+        However, sketch bit order needs to increment by one, so we need to iterate over the list,
+        take every two elements, and store it in the db, with correct bit order.
+         */
         session.beginTransaction();
 
         for (int i = 0; i < pivots.size(); i += 2) {
@@ -33,11 +41,27 @@ public class PivotPairsForXpSketchesDao {
             String sql = "insert into protein_chain_db." + storageTableName + " values (:pivotSetId, :sketchBitOrder, :pivot1Id, :pivot2Id)";
             var affectedRows = session.createNativeQuery(sql)
                     .setParameter("pivotSetId", pivotSet.getId())
-                    .setParameter("sketchBitOrder", (short) i)
+                    .setParameter("sketchBitOrder", (short) (i / 2))
                     .setParameter("pivot1Id", pivot1.getId().getProteinChain().getIntId())
                     .setParameter("pivot2Id", pivot2.getId().getProteinChain().getIntId())
                     .executeUpdate();
+            System.out.println("Affected rows: " + affectedRows);
         }
         session.getTransaction().commit();
+    }
+
+    public List<String[]> loadPairs(PivotSet pivotSet, String storageTableName) {
+        session.beginTransaction();
+
+        String sql = "select pivot1, pivot2 from protein_chain_db." + storageTableName + " order by sketchBitOrder asc";
+        List<Object[]> resultList = session.createNativeQuery(sql).getResultList();
+
+        List<String[]> pivotPairs = resultList.stream()
+                .map(objectArray -> Arrays.stream(objectArray)
+                        .map(Object::toString)
+                        .toArray(String[]::new))
+                .toList();
+        session.getTransaction().commit();
+        return pivotPairs;
     }
 }

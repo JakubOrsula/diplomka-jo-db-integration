@@ -4,8 +4,12 @@ import com.example.dao.*;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
+import com.example.service.ProteinChainMetadaService;
 import com.example.service.distance.ProteinChainService;
+import com.example.services.configuration.AppConfig;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
+import com.example.services.distance.CachedDistanceFunctionInterfaceImpl;
+import com.example.services.distance.DummyDistanceFunctionInterfaceImpl;
 import com.example.services.entrypoints.DatasetImpl;
 import com.example.services.storage.GHPSketchesPivotPairsStorageDBImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
@@ -14,29 +18,32 @@ import org.hibernate.SessionFactory;
 import vm.objTransforms.perform.TransformDataToGHPSketches;
 import vm.objTransforms.storeLearned.GHPSketchingPivotPairsStoreInterface;
 
+import java.io.IOException;
+
 import static com.example.App.getSessionFactory;
 
 public class ApplySketches {
 
-    public static void run(int sketchesLength) {
+    public static void run(int sketchesLength) throws IOException {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
-            var pivotPairsFor64pSketchesService = new PivotPairsForXpSketchesService(pivotSetService, new PivotPairsForXpSketchesDao(session));
-            GHPSketchingPivotPairsStoreInterface sketchingTechStorage = new GHPSketchesPivotPairsStorageDBImpl(session, pivotPairsFor64pSketchesService, pivotSetService);
+            var pivotPairsForXpSketchesService = new PivotPairsForXpSketchesService(pivotSetService, new PivotPairsForXpSketchesDao(session));
+            GHPSketchingPivotPairsStoreInterface sketchingTechStorage = new GHPSketchesPivotPairsStorageDBImpl(session, pivotPairsForXpSketchesService, pivotSetService);
             int[] sketchesLengths = new int[]{sketchesLength};
 
             //todo
-            var metricSpace = new AbstractMetricSpaceDBImpl(null);
+            var metricSpace = new AbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, AppConfig.SKETCH_LEARNING_SAMPLE_SIZE, AppConfig.SKETCH_LEARNING_PIVOTS_COUNT));
             //for learning sketches will return proteins with distance
             //todo corrent the "for" naming later
             var proteinChainDao = new ProteinChainForLearningSketchesDao(session);
             var proteinChainService = new ProteinChainService(pivotSetService, proteinChainDao);
-            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService);
+            var proteinChainMetadaService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), pivotSetService);
+            var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService, proteinChainMetadaService);
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
 
-            TransformDataToGHPSketches evaluator = new TransformDataToGHPSketches(dataset, sketchingTechStorage, metricSpaceStorage);
+            TransformDataToGHPSketches evaluator = new TransformDataToGHPSketches(dataset, sketchingTechStorage, metricSpaceStorage, AppConfig.SKETCH_LEARNING_BALANCE, AppConfig.SKETCH_LEARNING_PIVOTS_COUNT);
             evaluator.createSketchesForDatasetPivotsAndQueries(sketchesLengths);
         }
     }

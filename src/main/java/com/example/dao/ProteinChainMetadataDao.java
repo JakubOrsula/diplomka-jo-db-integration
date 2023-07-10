@@ -2,6 +2,8 @@ package com.example.dao;
 
 import com.example.model.PivotSet;
 import com.example.model.ProteinChainMetadata;
+import com.example.model.ProteinChainMetadataColumns;
+import com.example.services.configuration.AppConfig;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -166,5 +168,19 @@ public class ProteinChainMetadataDao {
                 currentPage++;
             }
         };
+    }
+
+    public void saveSketch(int pivotSetId, int chainIntId, ProteinChainMetadataColumns colName, String sketch) {
+        if (AppConfig.DRY_RUN) {
+            return;
+        }
+        session.beginTransaction();
+        String sql = "UPDATE proteinChainMetadata SET " + colName.getColumnName() + " = :sketch WHERE pivotSetId = :pivotSetId AND chainIntId = :chainIntId";
+        session.createNativeQuery(sql)
+                .setParameter("sketch", sketch)
+                .setParameter("pivotSetId", pivotSetId)
+                .setParameter("chainIntId", chainIntId)
+                .executeUpdate();
+        session.getTransaction().commit();
     }
 }

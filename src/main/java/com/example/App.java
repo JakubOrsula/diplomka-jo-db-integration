@@ -76,7 +76,11 @@ public class App
     }
 
     private static void applySketches() {
-        ApplySketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
+        try {
+            ApplySketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //todo normal runner

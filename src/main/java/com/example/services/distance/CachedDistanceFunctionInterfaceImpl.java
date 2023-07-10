@@ -52,7 +52,7 @@ public class CachedDistanceFunctionInterfaceImpl<T> implements DistanceFunctionI
                 cache[counter.get()][value] = distFloat;
             });
             counter.incrementAndGet();
-            if (counter.getOpaque() % 100 == 0)
+            if (counter.getOpaque() % 10000 == 0)
                 System.out.println("Prepared " + counter + " matrix rows");
         }
     }
