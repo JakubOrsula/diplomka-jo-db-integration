@@ -1,12 +1,9 @@
 package com.example.dao;
 
-import com.example.model.PivotSet;
-import com.example.model.ProteinChainMetadata;
-import com.example.model.ProteinChainMetadataColumns;
-import com.example.services.configuration.AppConfig;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
+import com.example.model.*;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import java.util.Iterator;
 import java.util.List;
@@ -16,9 +13,15 @@ import java.util.NoSuchElementException;
 public class ProteinChainMetadataDao {
 
     private final Session session;
+    private final SessionFactory sessionFactory;
 
     public ProteinChainMetadataDao(Session session) {
+        this(session, null);
+    }
+
+    public ProteinChainMetadataDao(Session session, SessionFactory sessionFactory) {
         this.session = session;
+        this.sessionFactory = sessionFactory;
     }
 
     public Iterator<ProteinChainMetadata> getProteinChainMetadatasWithValidDistances(PivotSet pivotSet) {
@@ -118,11 +121,11 @@ public class ProteinChainMetadataDao {
         };
     }
 
-    public Iterator<ProteinDataDao> getProteinDataWithValidDistances(PivotSet pivotSet) {
+    public Iterator<ProteinDistanceData> getProteinDataWithValidDistances(PivotSet pivotSet) {
         return new Iterator<>() {
             private int currentPage = 0;
             int lastId = -1;
-            private Iterator<ProteinDataDao> currentPageIterator;
+            private Iterator<ProteinDistanceData> currentPageIterator;
 
             @Override
             public boolean hasNext() {
@@ -133,7 +136,7 @@ public class ProteinChainMetadataDao {
             }
 
             @Override
-            public ProteinDataDao next() {
+            public ProteinDistanceData next() {
                 if (hasNext()) {
                     return currentPageIterator.next();
                 } else {
@@ -144,7 +147,7 @@ public class ProteinChainMetadataDao {
             private void loadNextPage() {
                 session.beginTransaction();
 
-                var queryString = "SELECT new com.example.dao.ProteinDataDao(pcm.id.proteinChain.intId, p.gesamtId, pcm.pivotDistances) " +
+                var queryString = "SELECT new com.example.model.ProteinDistanceData(pcm.id.proteinChain.intId, p.gesamtId, pcm.pivotDistances) " +
                         "FROM ProteinChainMetadata pcm " +
                         "JOIN ProteinChain p ON pcm.id.proteinChain.intId = p.intId " +
                         "WHERE  " +
@@ -153,12 +156,13 @@ public class ProteinChainMetadataDao {
                         "and pcm.id.proteinChain.intId > :offsetId " +
                         "order by pcm.id.proteinChain.intId";
 
-                var query = session.createQuery(queryString, ProteinDataDao.class)
+                var query = session.createQuery(queryString, ProteinDistanceData.class)
                         .setParameter("pivotSet", pivotSet)
                         .setParameter("offsetId", lastId)
-                        .setMaxResults(10000);
+                        .setMaxResults(100000);
 
-                List<ProteinDataDao> results = query.getResultList();
+                List<ProteinDistanceData> results = query.getResultList();
+                results.stream().parallel().forEach(ProteinDistanceData::convertJson);
                 if (!results.isEmpty()) {
                     lastId = results.get(results.size() - 1).chainIntId;
                 }
@@ -170,17 +174,84 @@ public class ProteinChainMetadataDao {
         };
     }
 
-    public void saveSketch(int pivotSetId, int chainIntId, ProteinChainMetadataColumns colName, String sketch) {
-        if (AppConfig.DRY_RUN) {
-            return;
+    public void saveSketchesPlainUpdate(List<SketchData> sketchDataList, int pivotSetId, ProteinChainMetadataColumns column) {
+        Transaction transaction = null;
+        String sql = "UPDATE proteinChainMetadata SET " + column.getColumnName() + " = :sketch WHERE pivotSetId = :pivotSetId AND chainIntId = :chainIntId";
+
+        try {
+            transaction = session.beginTransaction();
+
+            var query = session.createNativeQuery(sql);
+
+            long totalLoopStartTime = System.nanoTime();
+
+            for (SketchData sketchData : sketchDataList) {
+                long individualStartTime = System.nanoTime();
+
+                query.setParameter("sketch", sketchData.getJsonSketch())
+                        .setParameter("pivotSetId", pivotSetId)
+                        .setParameter("chainIntId", sketchData.getChainIntId());
+
+                query.executeUpdate();
+
+                long individualEndTime = System.nanoTime();
+                long individualTimeTaken = (individualEndTime - individualStartTime) / 1_000_000;
+                System.out.println("Query executed in: " + individualTimeTaken + " ms");
+            }
+
+            long totalLoopEndTime = System.nanoTime();
+            long totalLoopTimeTaken = (totalLoopEndTime - totalLoopStartTime) / 1_000_000;
+            System.out.println("Total time for loop execution: " + totalLoopTimeTaken + " ms");
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
+    }
+
+    public void transferSketches(ProteinChainMetadataColumns column) {
         session.beginTransaction();
-        String sql = "UPDATE proteinChainMetadata SET " + colName.getColumnName() + " = :sketch WHERE pivotSetId = :pivotSetId AND chainIntId = :chainIntId";
-        session.createNativeQuery(sql)
-                .setParameter("sketch", sketch)
-                .setParameter("pivotSetId", pivotSetId)
-                .setParameter("chainIntId", chainIntId)
-                .executeUpdate();
+        session.createNativeQuery("UPDATE proteinChainMetadata\n" +
+                "    INNER JOIN proteinChainMetadataTransfer\n" +
+                "    ON proteinChainMetadata.pivotSetId = proteinChainMetadataTransfer.pivotSetId\n" +
+                "        AND proteinChainMetadata.chainIntId = proteinChainMetadataTransfer.chainIntId\n" +
+                "SET proteinChainMetadata." + column.getColumnName() + " = proteinChainMetadataTransfer." + column.getColumnName() + ";").executeUpdate();
         session.getTransaction().commit();
     }
+
+    public void cleanTransferTable() {
+        session.beginTransaction();
+        session.createNativeQuery("truncate table proteinChainMetadataTransfer").executeUpdate();
+        session.getTransaction().commit();
+    }
+
+
+    public void saveSketchesThroughTransferTable(List<SketchData> sketchDataList, int pivotSetId, ProteinChainMetadataColumns column) {
+        Transaction transaction = session.beginTransaction();
+
+        StringBuilder insertValues = new StringBuilder();
+        // unfortunately hibernate does not support mass insert prepared statements for mariadb
+        for (SketchData sketchData : sketchDataList) {
+            insertValues.append("(")
+                    .append(pivotSetId).append(",")
+                    .append(sketchData.getChainIntId()).append(", '")
+                    .append(sketchData.getJsonSketch()).append("'),");
+        }
+
+        // Remove the last comma
+        insertValues.setLength(insertValues.length() - 1);
+
+        String sql = "INSERT INTO proteinChainMetadataTransfer (pivotSetId, chainIntId, " + column.getColumnName() + ") " +
+                "VALUES " + insertValues;
+        session.createNativeQuery(sql).executeUpdate();
+
+        transaction.commit();
+    }
+
 }
+

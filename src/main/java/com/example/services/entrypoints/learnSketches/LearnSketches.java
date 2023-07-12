@@ -4,7 +4,7 @@ import com.example.dao.*;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
-import com.example.service.ProteinChainMetadaService;
+import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.configuration.AppConfig;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
@@ -38,7 +38,7 @@ public class LearnSketches {
             var metricSpace = new AbstractMetricSpaceDBImpl(distanceFunction);
             //we don't want the code to interact directly with db
             var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForLearningSketchesDao(session));
-            var proteinChainMetadaService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), pivotSetService);
+            var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session), pivotSetService);
             var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService, proteinChainMetadaService);
 
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);

@@ -2,12 +2,11 @@ package com.example.services.distance;
 
 import com.example.dao.PivotSetDao;
 import com.example.dao.ProteinChainMetadataDao;
-import com.example.dao.ProteinDataDao;
+import com.example.model.ProteinDistanceData;
 import com.example.model.SimpleProtein;
-import com.example.model.json.Converter;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
-import com.example.service.ProteinChainMetadaService;
+import com.example.service.ProteinChainMetadataService;
 import org.hibernate.Session;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
@@ -34,15 +33,15 @@ public class CachedDistanceFunctionInterfaceImpl<T> implements DistanceFunctionI
             intPivotToIdxMapping.put(pivots.get(i).getIntId(), i);
         }
 
-        var proteinChainMetadataService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), new PivotSetService(new PivotSetDao(session)));
+        var proteinChainMetadataService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session), new PivotSetService(new PivotSetDao(session)));
         var pcms = proteinChainMetadataService.getProteinChainDistancesData();
         AtomicInteger counter = new AtomicInteger(0);
         //fill out the matrix
         while (pcms.hasNext() && counter.get() < sampleSize) {
-            ProteinDataDao pd = pcms.next();
+            ProteinDistanceData pd = pcms.next();
             // int id into row
             protToIdxMapping.put(pd.gesamtId, counter.get());
-            var dist_dict = Converter.fromJsonString(pd.pivotDistances).getDists();
+            var dist_dict = pd.metadata.getDists();
             dataSetSample.add(new SimpleProtein(pd.chainIntId, pd.gesamtId));
 
             //dist into matrix, ordered by columnHeaders
@@ -58,11 +57,21 @@ public class CachedDistanceFunctionInterfaceImpl<T> implements DistanceFunctionI
     }
 
     @Override
-    public float getDistance(String pivotGesamt, String proteinGesamt) {
-        var protIdx = protToIdxMapping.get(proteinGesamt);
-        var pivotIdx = pivotToIdxMapping.get(pivotGesamt);
+    public float getDistance(String gid1, String gid2) {
+        Integer protIdx;
+        Integer pivotIdx;
+        if (gid1.startsWith("@")) {
+            protIdx = protToIdxMapping.get(gid2);
+            pivotIdx = pivotToIdxMapping.get(gid1);
+        } else {
+            protIdx = protToIdxMapping.get(gid1);
+            pivotIdx = pivotToIdxMapping.get(gid2);
+        }
         if (protIdx == null || pivotIdx == null) {
-            throw new Error("distance not found in cache");
+            if (protToIdxMapping.get(gid1) != null && pivotToIdxMapping.get(gid2) != null) {
+                throw new Error("reversed distance function args " + gid1 + ", " + gid2);
+            }
+            throw new Error("distance not found in cache " + gid1 + ", " + gid2);
         }
         return cache[protIdx][pivotIdx];
     }

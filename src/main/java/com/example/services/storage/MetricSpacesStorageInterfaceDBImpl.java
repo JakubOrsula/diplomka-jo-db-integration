@@ -2,7 +2,7 @@ package com.example.services.storage;
 
 import com.example.model.*;
 import com.example.service.PivotService;
-import com.example.service.ProteinChainMetadaService;
+import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
 import org.hibernate.cfg.NotYetImplementedException;
 import vm.metricSpace.MetricSpacesStorageInterface;
@@ -17,13 +17,13 @@ import java.util.*;
 public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInterface {
     private final PivotService pivotService;
     private final ProteinChainService proteinChainService;
-    private final ProteinChainMetadaService proteinChainMetadaService;
+    private final ProteinChainMetadataService proteinChainMetadataService;
 
-    public MetricSpacesStorageInterfaceDBImpl(PivotService pivotService, ProteinChainService proteinChainService, ProteinChainMetadaService proteinChainMetadaService) {
+    public MetricSpacesStorageInterfaceDBImpl(PivotService pivotService, ProteinChainService proteinChainService, ProteinChainMetadataService proteinChainMetadataService) {
         super();
         this.pivotService = pivotService;
         this.proteinChainService = proteinChainService;
-        this.proteinChainMetadaService = proteinChainMetadaService;
+        this.proteinChainMetadataService = proteinChainMetadataService;
     }
 
     public Iterator<Object> getObjectsFromDataset(String datasetName, Object... params) {
@@ -49,13 +49,39 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
         return new ArrayList<>();
     }
 
+    @Override
     public void storeObjectToDataset(Object metricObject, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
-        //todo we need more information than just id, gesamtid to insert row into the db
-        var entry = (AbstractMap.SimpleEntry) metricObject;
-        var chainId = Integer.parseInt((String) entry.getKey());
-        var sketch = (long[]) entry.getValue();
-        System.out.println("Will store chain " + entry.getKey() + " with " + sketch[0]);
-        proteinChainMetadaService.saveSketch(chainId, sketch);
+        throw new RuntimeException("use storeObjectsToDataset to store in bulk instead");
+    }
+
+    //todo move the implementation details to a service
+    public synchronized int storeObjectsToDataset(Iterator<Object> it, int count, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
+        List<SketchData> sketchDataList = new ArrayList<>();
+
+        proteinChainMetadataService.ensureEmptyTransferTable();
+        long counter = 0;
+        while (it.hasNext()) {
+            counter++;
+            AbstractMap.SimpleEntry entry = (AbstractMap.SimpleEntry) it.next();
+            int chainId = Integer.parseInt((String) entry.getKey());
+            long[] sketch = (long[]) entry.getValue();
+
+            sketchDataList.add(new SketchData(chainId, sketch));
+
+            final int batch_size = 5000;
+            if (sketchDataList.size() == batch_size || !it.hasNext()) {
+                long startInsert = System.currentTimeMillis();
+                proteinChainMetadataService.saveSketches(sketchDataList);
+                sketchDataList.clear();
+                long endInsert = System.currentTimeMillis();
+                System.out.println("Batch inserted in: " + ((endInsert - startInsert) / 1000.0) + " seconds. Total inserted rows: " + counter);
+            }
+        }
+        System.out.println("Sketches will be transferred");
+        proteinChainMetadataService.transferSketches();
+        System.out.println("Sketches transferred");
+        proteinChainMetadataService.ensureEmptyTransferTable();
+        return 0;
     }
 
     //todo used just for applying sketches

@@ -6,7 +6,7 @@ import com.example.dao.ProteinChainForDistanceDao;
 import com.example.dao.ProteinChainMetadataDao;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
-import com.example.service.ProteinChainMetadaService;
+import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
 import com.example.services.distance.DistanceFunctionInterfaceImpl;
@@ -27,7 +27,7 @@ public class DistanceComputation {
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
             var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForDistanceDao(session));
-            var proteinChainMetadaService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), pivotSetService);
+            var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session), pivotSetService);
             var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService, proteinChainMetadaService);
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
             var evaluator = new EvalAndStoreObjectsToPivotsDists(session, pivotSetService);

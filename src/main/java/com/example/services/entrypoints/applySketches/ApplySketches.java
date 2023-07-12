@@ -4,12 +4,11 @@ import com.example.dao.*;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
-import com.example.service.ProteinChainMetadaService;
+import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.configuration.AppConfig;
 import com.example.services.distance.AbstractMetricSpaceDBImpl;
 import com.example.services.distance.CachedDistanceFunctionInterfaceImpl;
-import com.example.services.distance.DummyDistanceFunctionInterfaceImpl;
 import com.example.services.entrypoints.DatasetImpl;
 import com.example.services.storage.GHPSketchesPivotPairsStorageDBImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
@@ -33,13 +32,13 @@ public class ApplySketches {
             GHPSketchingPivotPairsStoreInterface sketchingTechStorage = new GHPSketchesPivotPairsStorageDBImpl(session, pivotPairsForXpSketchesService, pivotSetService);
             int[] sketchesLengths = new int[]{sketchesLength};
 
-            //todo
-            var metricSpace = new AbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, AppConfig.SKETCH_LEARNING_SAMPLE_SIZE, AppConfig.SKETCH_LEARNING_PIVOTS_COUNT));
+            //we want full cache. Todo cleaner variant without hardcoded constants
+            var metricSpace = new AbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, 720000, 512));
             //for learning sketches will return proteins with distance
             //todo corrent the "for" naming later
             var proteinChainDao = new ProteinChainForLearningSketchesDao(session);
             var proteinChainService = new ProteinChainService(pivotSetService, proteinChainDao);
-            var proteinChainMetadaService = new ProteinChainMetadaService(new ProteinChainMetadataDao(session), pivotSetService);
+            var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session, sessionFactory), pivotSetService);
             var metricSpaceStorage = new MetricSpacesStorageInterfaceDBImpl(pivotService, proteinChainService, proteinChainMetadaService);
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
 
