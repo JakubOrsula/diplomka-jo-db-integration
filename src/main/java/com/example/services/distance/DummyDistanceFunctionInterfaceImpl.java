@@ -3,7 +3,7 @@ package com.example.services.distance;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
 
-public class DummyDistanceFunctionInterfaceImpl<T> implements DistanceFunctionInterface<String> {
+public class DummyDistanceFunctionInterfaceImpl<T> extends DistanceFunctionInterface<String> {
 
     public DummyDistanceFunctionInterfaceImpl(Object ...args) {
 

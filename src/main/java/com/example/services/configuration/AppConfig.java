@@ -63,4 +63,7 @@ public class AppConfig {
     public static final int SKETCH_LEARNING_PIVOTS_COUNT = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_PIVOTS_COUNT"));
     // What should be the ratio of 1s to 0s in one column of the matrix? Mic used 0.5 - meaning same count of 1s and 0s
     public static final float SKETCH_LEARNING_BALANCE = Float.parseFloat(properties.getProperty("SKETCH_LEARNING_BALANCE"));
+
+    /** SECONDARY FILTERING **/
+    public static final String SECONDARY_FILTERING_SKETCHES_DIR = properties.getProperty("SECONDARY_FILTERING_SKETCHES_DIR");
 }

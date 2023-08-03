@@ -1,13 +1,13 @@
-package com.example.services.distance;
+package com.example.services.DatasetAbstractionLayer.Proteins;
 
 import com.example.model.SimpleProtein;
 import vm.metricSpace.AbstractMetricSpace;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
-public class AbstractMetricSpaceDBImpl extends AbstractMetricSpace<String> {
+public class ProteinAbstractMetricSpaceDBImpl extends AbstractMetricSpace<String> {
     private final DistanceFunctionInterface<String> distanceFunctionInstance;
 
-    public AbstractMetricSpaceDBImpl(DistanceFunctionInterface<String> distanceFunctionInstance) {
+    public ProteinAbstractMetricSpaceDBImpl(DistanceFunctionInterface<String> distanceFunctionInstance) {
         this.distanceFunctionInstance = distanceFunctionInstance;
     }
 

@@ -7,6 +7,7 @@ import com.example.services.entrypoints.applySketches.ApplySketches;
 import com.example.services.entrypoints.consistencyCheck.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
+import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -83,6 +84,11 @@ public class App
         }
     }
 
+    private static void secondaryFiltering() {
+        LearnSecondaryFilteringWithGHPSketches.start();
+
+    }
+
     //todo normal runner
     public static void main(String[] args) {
         Args arguments = new Args();
@@ -93,13 +99,13 @@ public class App
 
         AppConfig.DRY_RUN = arguments.dryRun;
 
-        //todo add dry run support
         switch (arguments.runFunction) {
             case "quickChecks" -> quickChecks();
             case "slowChecks" -> slowChecks(arguments.dryRun);
             case "computeDistances" -> computeDistances();
             case "learnSketches" -> learnSketches();
             case "applySketches" -> applySketches();
+            case "secondaryFiltering" -> secondaryFiltering();
             default ->
                     System.out.println("Invalid function name passed. Please check the function name and try again.");
         }

@@ -1,15 +1,16 @@
 package com.example.services.entrypoints.applySketches;
 
 import com.example.dao.*;
+import com.example.model.SimpleProtein;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
 import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
+import com.example.services.DatasetAbstractionLayer.Proteins.ProteinAbstractMetricSpaceDBImpl;
 import com.example.services.configuration.AppConfig;
-import com.example.services.distance.AbstractMetricSpaceDBImpl;
 import com.example.services.distance.CachedDistanceFunctionInterfaceImpl;
-import com.example.services.entrypoints.DatasetImpl;
+import com.example.services.storage.DatasetImpl;
 import com.example.services.storage.GHPSketchesPivotPairsStorageDBImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.hibernate.Session;
@@ -33,9 +34,9 @@ public class ApplySketches {
             int[] sketchesLengths = new int[]{sketchesLength};
 
             //we want full cache. Todo cleaner variant without hardcoded constants
-            var metricSpace = new AbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, 720000, 512));
+            var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, 720000, 512));
             //for learning sketches will return proteins with distance
-            //todo corrent the "for" naming later
+            //todo correct the "for" naming later
             var proteinChainDao = new ProteinChainForLearningSketchesDao(session);
             var proteinChainService = new ProteinChainService(pivotSetService, proteinChainDao);
             var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session, sessionFactory), pivotSetService);

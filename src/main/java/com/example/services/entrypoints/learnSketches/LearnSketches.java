@@ -7,9 +7,9 @@ import com.example.service.PivotSetService;
 import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
 import com.example.services.configuration.AppConfig;
-import com.example.services.distance.AbstractMetricSpaceDBImpl;
+import com.example.services.DatasetAbstractionLayer.Proteins.ProteinAbstractMetricSpaceDBImpl;
 import com.example.services.distance.CachedDistanceFunctionInterfaceImpl;
-import com.example.services.entrypoints.DatasetImpl;
+import com.example.services.storage.DatasetImpl;
 import com.example.services.storage.GHPSketchesPivotPairsStorageDBImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.hibernate.Session;
@@ -35,7 +35,7 @@ public class LearnSketches {
             var numberOfPivots = AppConfig.SKETCH_LEARNING_PIVOTS_COUNT;
 
             var distanceFunction = new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, sampleSize, numberOfPivots);
-            var metricSpace = new AbstractMetricSpaceDBImpl(distanceFunction);
+            var metricSpace = new ProteinAbstractMetricSpaceDBImpl(distanceFunction);
             //we don't want the code to interact directly with db
             var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForLearningSketchesDao(session));
             var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session), pivotSetService);

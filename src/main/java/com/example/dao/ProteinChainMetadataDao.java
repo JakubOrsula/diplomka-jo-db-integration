@@ -1,13 +1,15 @@
 package com.example.dao;
 
 import com.example.model.*;
+import com.example.services.entrypoints.secondaryFiltering.AllSketchesResult;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+
+import java.util.*;
 
 
 public class ProteinChainMetadataDao {
@@ -252,6 +254,100 @@ public class ProteinChainMetadataDao {
 
         transaction.commit();
     }
+
+    public long[] getSketch(int pivotSetId, int chainIntId, ProteinChainMetadataColumns column) {
+        Transaction transaction = null;
+        String sql = "SELECT " + column.getColumnName() + " FROM proteinChainMetadata WHERE pivotSetId = :pivotSetId AND chainIntId = :chainIntId";
+
+        try {
+            transaction = session.beginTransaction();
+
+            var query = session.createNativeQuery(sql);
+
+            query.setParameter("pivotSetId", pivotSetId)
+                    .setParameter("chainIntId", chainIntId);
+
+            var result = query.getSingleResult();
+
+            transaction.commit();
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(result.toString());
+            JsonNode arrayNode = node.get("sk1024_long");
+
+            List<Long> longList = new ArrayList<>();
+            if (arrayNode.isArray()) {
+                for (JsonNode arrayElement : arrayNode) {
+                    longList.add(arrayElement.asLong());
+                }
+            }
+
+            long[] array = longList.stream().mapToLong(l -> l).toArray();
+
+            return array;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw new RuntimeException(e);
+        }
+    }
+    public AllSketchesResult getAllSketches(int pivotSetId, ProteinChainMetadataColumns column) {
+        Transaction transaction = null;
+        String sql = "SELECT chainIntId, " + column.getColumnName() + " FROM proteinChainMetadata WHERE pivotSetId = :pivotSetId";
+
+        try {
+            transaction = session.beginTransaction();
+
+            var query = session.createNativeQuery(sql);
+
+            query.setParameter("pivotSetId", pivotSetId);
+
+            var resultList = query.getResultList();
+            System.out.println("Sketch result list size: " + resultList.size());
+
+            transaction.commit();
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<long[]> arraysList = new ArrayList<>();
+            Map<Integer, Integer> idToIndexMap = new HashMap<>();
+
+            int index = 0;
+            for (Object result : resultList) {
+                Object[] resultArray = (Object[]) result;
+                int chainIntId = ((Number) resultArray[0]).intValue();
+                if (Objects.equals(resultArray[1].toString(), "")) {
+                    System.out.println("Empty sketch for chainIntId: " + chainIntId);
+                    continue;
+                }
+                JsonNode node = mapper.readTree(resultArray[1].toString());
+                JsonNode arrayNode = node.get("sk1024_long");
+
+                List<Long> longList = new ArrayList<>();
+                if (arrayNode.isArray()) {
+                    for (JsonNode arrayElement : arrayNode) {
+                        longList.add(arrayElement.asLong());
+                    }
+                }
+
+                long[] array = longList.stream().mapToLong(l -> l).toArray();
+                arraysList.add(array);
+                idToIndexMap.put(chainIntId, index++);
+            }
+
+            var result = new AllSketchesResult();
+            result.sketches = arraysList;
+            result.mapping = idToIndexMap;
+            return result;
+        } catch (Exception e) {
+            System.out.println("Error in getAllSketches" + e.getMessage());
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }
 

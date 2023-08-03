@@ -8,6 +8,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class ProteinChainDao {
     protected final Session session;
@@ -35,32 +36,17 @@ public abstract class ProteinChainDao {
         // query all rows from the Protein table
         session.beginTransaction();
         var query = getChainsSelectQuery(pivotSet);
-        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-        int finalLimit = limit;
-        Iterator<SimpleProtein> iterator = new Iterator<>() {
-            private int retrieved = 0;
-            @Override
-            public boolean hasNext() {
-                //todo sql limit might be better so we dont over-fetch
-                if (retrieved == finalLimit) {
-                    return false;
-                }
-                boolean hasNext = results.next();
-                if (!hasNext) {
-                    results.close();
-                }
-                return hasNext;
-            }
-
-            @Override
-            public SimpleProtein next() {
-                var pc = (ProteinChain) results.get(0);
-                retrieved++;
-                return new SimpleProtein(pc.getIntId(), pc.getGesamtId());
-            }
-        };
-
+        //the scroll mode is shit, it iterates the whole table at db. Use manual paging just like in pcms
+        List<ProteinChain> results = query.getResultList();
         session.getTransaction().commit();
-        return iterator;
+        //todo sql limit
+        if (limit != -1 && results.size() >= limit) {
+            System.out.println("Limiting to " + limit);
+            results = results.subList(0, limit);
+        }
+        return results.stream()
+                .map(pc -> new SimpleProtein(pc.getIntId(), pc.getGesamtId()))
+                .iterator();
+
     }
 }

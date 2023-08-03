@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CachedDistanceFunctionInterfaceImpl<T> implements DistanceFunctionInterface<String> {
+public class CachedDistanceFunctionInterfaceImpl<T> extends DistanceFunctionInterface<String> {
     private final float[][] cache;
     private final Map<String, Integer> protToIdxMapping = new HashMap<>();
     private final Map<String, Integer> pivotToIdxMapping = new HashMap<>();

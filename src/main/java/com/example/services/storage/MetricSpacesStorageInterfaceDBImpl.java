@@ -4,8 +4,9 @@ import com.example.model.*;
 import com.example.service.PivotService;
 import com.example.service.ProteinChainMetadataService;
 import com.example.service.distance.ProteinChainService;
+import com.example.services.configuration.AppConfig;
 import org.hibernate.cfg.NotYetImplementedException;
-import vm.metricSpace.MetricSpacesStorageInterface;
+import vm.metricSpace.AbstractMetricSpacesStorage;
 
 import java.util.*;
 
@@ -14,7 +15,7 @@ import java.util.*;
   but the only correct way to handle it is to remove it as a whole.
   For example proteinChainMetadaService is needed just for applying sketches.
  */
-public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInterface {
+public class MetricSpacesStorageInterfaceDBImpl extends AbstractMetricSpacesStorage {
     private final PivotService pivotService;
     private final ProteinChainService proteinChainService;
     private final ProteinChainMetadataService proteinChainMetadataService;
@@ -56,6 +57,9 @@ public class MetricSpacesStorageInterfaceDBImpl extends MetricSpacesStorageInter
 
     //todo move the implementation details to a service
     public synchronized int storeObjectsToDataset(Iterator<Object> it, int count, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
+        if (AppConfig.DRY_RUN) {
+            return 0;
+        }
         List<SketchData> sketchDataList = new ArrayList<>();
 
         proteinChainMetadataService.ensureEmptyTransferTable();

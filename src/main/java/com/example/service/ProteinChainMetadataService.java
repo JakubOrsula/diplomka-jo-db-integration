@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.dao.ProteinChainMetadataDao;
 import com.example.model.*;
 import com.example.services.configuration.AppConfig;
+import com.example.services.entrypoints.secondaryFiltering.AllSketchesResult;
 
 import java.util.Iterator;
 import java.util.List;
@@ -53,5 +54,15 @@ public class ProteinChainMetadataService {
         PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
         sketchDataList.stream().parallel().forEach(SketchData::convertSketch);
         proteinChainMetadataDao.saveSketchesThroughTransferTable(sketchDataList, pivotSet.getId(), columnBasedOnPivotCount());
+    }
+
+    public long[] getSketch(int proteinChainId) {
+        PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
+        return proteinChainMetadataDao.getSketch(pivotSet.getId(), proteinChainId, ProteinChainMetadataColumns.SKETCH_512P);
+    }
+
+    public AllSketchesResult getAllSketches() {
+        PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
+        return proteinChainMetadataDao.getAllSketches(pivotSet.getId(), ProteinChainMetadataColumns.SKETCH_512P);
     }
 }

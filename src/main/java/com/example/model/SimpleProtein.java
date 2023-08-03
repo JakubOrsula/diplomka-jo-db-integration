@@ -1,5 +1,7 @@
 package com.example.model;
 
+import com.example.services.entrypoints.secondaryFiltering.SketchDataSingleton;
+
 public class SimpleProtein {
     private final int intId;
     private final String gesamtId;
@@ -15,6 +17,10 @@ public class SimpleProtein {
 
     public String getGesamtId() {
         return gesamtId;
+    }
+
+    public long[] getBigSketch() {
+        return SketchDataSingleton.getInstance().getSketch(this.intId);
     }
 }
 
