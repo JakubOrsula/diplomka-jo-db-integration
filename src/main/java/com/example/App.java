@@ -4,14 +4,16 @@ import com.beust.jcommander.JCommander;
 import com.example.services.configuration.AppConfig;
 import com.example.services.configuration.Args;
 import com.example.services.entrypoints.applySketches.ApplySketches;
-import com.example.services.entrypoints.consistencyCheck.ConsistencyCheck;
+import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
+import com.example.services.entrypoints.selfchecks.GesamtLibIntegrationCheck;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -56,12 +58,24 @@ public class App
         return sessionFactory;
     }
 
-    private static void quickChecks() {
+    /**
+     * Checks whether all distances were computed and if not how many are missing.
+     */
+    private static void checkComputedDistances() {
+
         ConsistencyCheck.CheckComputedDistances();
     }
 
-    private static void slowChecks(boolean dryRun) {
-        ConsistencyCheck.RemoveProteinChainsWithoutFile(true);
+    private static void checkGesamtLibPresence() {
+        GesamtLibIntegrationCheck.checkLibraryExists();
+    }
+
+    private static void checkGesamtBinaryFilesAreInDB() {
+        ConsistencyCheck.CheckGesamtBinaryFilesAreInDB(new File(AppConfig.PDBE_BINARY_FILES_DIR));
+    }
+
+    private static void removeProteinChainsWithoutFile(boolean dryRun) {
+        ConsistencyCheck.RemoveProteinChainsWithoutFile(dryRun);
     }
 
     private static void computeDistances() {
@@ -100,8 +114,10 @@ public class App
         AppConfig.DRY_RUN = arguments.dryRun;
 
         switch (arguments.runFunction) {
-            case "quickChecks" -> quickChecks();
-            case "slowChecks" -> slowChecks(arguments.dryRun);
+            case "checkGesamtLibPresence" -> checkGesamtLibPresence();
+            case "checkComputedDistances" -> checkComputedDistances();
+            case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
+            case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
             case "computeDistances" -> computeDistances();
             case "learnSketches" -> learnSketches();
             case "applySketches" -> applySketches();

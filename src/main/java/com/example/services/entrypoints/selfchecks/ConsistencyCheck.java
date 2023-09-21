@@ -1,4 +1,4 @@
-package com.example.services.entrypoints.consistencyCheck;
+package com.example.services.entrypoints.selfchecks;
 
 import com.example.dao.PivotSetDao;
 import com.example.dao.ProteinChainForLearningSketchesDao;
@@ -14,17 +14,14 @@ import static com.example.App.getSessionFactory;
 public class ConsistencyCheck {
 
     /**
-     * Checks whether binary files were expanded into chains and stored into DB.
-     * Failure to store one chain invalidates whole file.
-     * todo this implementation lacks checking if there are less than 10 atoms so it is useless now
+     * Checks whether binary chains are stored in the DB.
      * @param rootDir - root directory of binary files e.g /mnt/data/PDBe_binary
-     * @param dryRun - if true no destructive operation will be performed
      */
-    public static void CheckGesamtFilesAreInDB(File rootDir, boolean dryRun) {
+    public static void CheckGesamtBinaryFilesAreInDB(File rootDir) {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
             var fixer = new BinaryAndDBConsistencyFixer(session);
-            fixer.CheckGesamtFilesAreInDB(rootDir);
+            fixer.CheckGesamtBinaryFilesAreInDB(rootDir);
         }
     }
 
@@ -42,13 +39,14 @@ public class ConsistencyCheck {
     }
 
     public static void CheckComputedDistances() {
+        System.out.println("Getting total proteins and proteins with valid distances counts. This process will take a long time...");
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
             var totalProteins = session.createQuery("select count(*) from ProteinChain where indexedAsDataObject=true ", Long.class).getSingleResult();
 
             var pService = new ProteinChainService(new PivotSetService(new PivotSetDao(session)), new ProteinChainForLearningSketchesDao(session));
             var proteinsWithValidDistances = pService.getChainsCount();
-            System.out.println("Total valid proteins:               " + totalProteins);
+            System.out.println("Total valid proteins:         " + totalProteins);
             System.out.println("Proteins with valid distance: " + proteinsWithValidDistances);
             System.out.println("Missing:                      " + (totalProteins - proteinsWithValidDistances));
         }

@@ -11,6 +11,7 @@ import com.example.service.distance.ProteinChainService;
 import com.example.services.DatasetAbstractionLayer.Proteins.ProteinAbstractMetricSpaceDBImpl;
 import com.example.services.DatasetAbstractionLayer.Sketches.SketchAbstractMetricSpaceDBImpl;
 import com.example.services.configuration.AppConfig;
+import com.example.services.distance.DistanceFunctionInterfaceImpl;
 import com.example.services.storage.DatasetImpl;
 import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.hibernate.Session;
@@ -36,7 +37,7 @@ public class LearnSecondaryFilteringWithGHPSketches {
         var pivotService = new PivotService(new PivotDao(session), pivotSetService);
         var sampleSize = AppConfig.SKETCH_LEARNING_SAMPLE_SIZE; //todo better differentiate from LearnSketches
         var numberOfPivots = AppConfig.SKETCH_LEARNING_PIVOTS_COUNT;
-        var metricSpace = new ProteinAbstractMetricSpaceDBImpl(null);
+        var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new DistanceFunctionInterfaceImpl<String>());
         //we don't want the code to interact directly with db
         var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForLearningSketchesDao(session));
         var proteinChainMetadaService = new ProteinChainMetadataService(new ProteinChainMetadataDao(session), pivotSetService);

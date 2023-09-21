@@ -1,4 +1,4 @@
-package com.example.services.entrypoints.consistencyCheck;
+package com.example.services.entrypoints.selfchecks;
 
 import com.example.model.ProteinChain;
 import com.example.services.configuration.AppConfig;
@@ -54,8 +54,8 @@ public class BinaryAndDBConsistencyFixer {
         System.out.println(totalMissing + "/" + total + " missing");
     }
 
-    //todo this does not currently consider that we are skipping chains shorter than 10 atoms
-    public void CheckGesamtFilesAreInDB(File rootDirectory) {
+    public void CheckGesamtBinaryFilesAreInDB(File rootDirectory) {
+        System.out.println("Checking if all gesamt binary files are in the database");
         Deque<File> stack = new LinkedList<>();
         stack.push(rootDirectory);
 
@@ -94,8 +94,8 @@ public class BinaryAndDBConsistencyFixer {
             }
         }
 
-        System.out.println("Total files processed: " + totalFiles);
         System.out.println("Missing files: " + missingFiles);
+        System.out.println("Total files processed: " + totalFiles);
     }
 
 }
