@@ -21,6 +21,7 @@ public class SketchData {
     }
 
     private String jsonKeyBasedOnSketchLength() {
+        //todo why is configuration accessed so deep down in application code?
         int sketchLength = AppConfig.SKETCH_LEARNING_SKETCH_LENGTH;
         return switch (sketchLength) {
             case 192 -> "sk192_long";

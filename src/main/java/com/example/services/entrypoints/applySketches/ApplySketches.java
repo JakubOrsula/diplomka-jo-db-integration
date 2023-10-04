@@ -24,6 +24,14 @@ import static com.example.App.getSessionFactory;
 
 public class ApplySketches {
 
+
+    /**
+     * This method is used to create the sketches.
+     * It will store them in proteinChainMetadata table,
+     * in the column based on the pivot count - either sketch512p or sketch64p.
+     * @param sketchesLength - witch sketches should be computed
+     * @throws IOException
+     */
     public static void run(int sketchesLength) throws IOException {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {

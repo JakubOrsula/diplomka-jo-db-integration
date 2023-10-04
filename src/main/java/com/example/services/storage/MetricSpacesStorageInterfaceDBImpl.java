@@ -55,6 +55,7 @@ public class MetricSpacesStorageInterfaceDBImpl extends AbstractMetricSpacesStor
         throw new RuntimeException("use storeObjectsToDataset to store in bulk instead");
     }
 
+    //todo used just for applying sketches
     //todo move the implementation details to a service
     public synchronized int storeObjectsToDataset(Iterator<Object> it, int count, String datasetName, Object... additionalParamsToStoreWithNewDataset) {
         if (AppConfig.DRY_RUN) {
@@ -69,6 +70,10 @@ public class MetricSpacesStorageInterfaceDBImpl extends AbstractMetricSpacesStor
             AbstractMap.SimpleEntry entry = (AbstractMap.SimpleEntry) it.next();
             int chainId = Integer.parseInt((String) entry.getKey());
             long[] sketch = (long[]) entry.getValue();
+
+            if (sketch.length == 0) {
+                sketch = new long[]{0};
+            }
 
             sketchDataList.add(new SketchData(chainId, sketch));
 

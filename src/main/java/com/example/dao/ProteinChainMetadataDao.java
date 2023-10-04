@@ -147,6 +147,7 @@ public class ProteinChainMetadataDao {
             }
 
             private void loadNextPage() {
+                currentPageIterator = null;
                 session.beginTransaction();
 
                 var queryString = "SELECT new com.example.model.ProteinDistanceData(pcm.id.proteinChain.intId, p.gesamtId, pcm.pivotDistances) " +
@@ -161,7 +162,7 @@ public class ProteinChainMetadataDao {
                 var query = session.createQuery(queryString, ProteinDistanceData.class)
                         .setParameter("pivotSet", pivotSet)
                         .setParameter("offsetId", lastId)
-                        .setMaxResults(100000);
+                        .setMaxResults(10000); //todo to properties, where more ram is available 100k is much faster
 
                 List<ProteinDistanceData> results = query.getResultList();
                 results.stream().parallel().forEach(ProteinDistanceData::convertJson);
