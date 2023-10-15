@@ -23,19 +23,7 @@ import java.io.IOException;
 public class App
 {
 
-    public static void migrate() {
-        //todo make this work
-        System.out.println( "Hello World!" );
-        Flyway flyway = Flyway.configure()
-                .dataSource("jdbc:mariadb://localhost:3306/protein_chain_db", "chain", "OneCha1n2RuleThem4ll")
-                .locations("classpath:/db/migration")
-                .load();
-        flyway.migrate();
-
-    }
-
-    // todo whole session handling is wrong
-    private static SessionFactory sessionFactory = buildSessionFactory();
+    private static SessionFactory sessionFactory = null;
 
     private static SessionFactory buildSessionFactory() {
         try {
@@ -49,13 +37,23 @@ public class App
 
             return configuration.buildSessionFactory();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Failed to build the SessionFactory.", e);
         }
     }
 
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+
+    public static void migrate() {
+        Flyway flyway = Flyway.configure()
+                .dataSource(AppConfig.FLYWAY_CONNECTION_URL,
+                        AppConfig.FLYWAY_CONNECTION_USERNAME,
+                        AppConfig.FLYWAY_CONNECTION_PASSWORD)
+                .defaultSchema(AppConfig.FLYWAY_CONNECTION_SCHEMA)
+                .locations("classpath:/db/migration")
+                .load();
+        flyway.migrate();
     }
 
     /**
@@ -112,6 +110,9 @@ public class App
                 .parse(args);
 
         AppConfig.DRY_RUN = arguments.dryRun;
+
+        migrate();
+        sessionFactory = buildSessionFactory();
 
         switch (arguments.runFunction) {
             case "checkGesamtLibPresence" -> checkGesamtLibPresence();

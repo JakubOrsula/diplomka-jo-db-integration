@@ -41,17 +41,21 @@ public class AppConfig {
     public static final int CONSUMER_BUFFER_SIZE = Integer.parseInt(properties.getProperty("CONSUMER_BUFFER_SIZE"));
     /*
     Following two variables are used to limit protein chain distance computation to limited set of ids.
-    This allows running this program on multiple PCs, connected to same database, better pallelizing the workload.
+    This allows running this program on multiple PCs, connected to same database, better parallelling the workload.
     Setting either to -1 disables the option.
     //todo move this to readme
      */
     public static final int COMPUTE_CHAIN_FROM = Integer.parseInt(properties.getProperty("COMPUTE_CHAIN_FROM"));
     public static final int COMPUTE_CHAIN_TO = Integer.parseInt(properties.getProperty("COMPUTE_CHAIN_TO"));
 
-    /** HIBERNATE **/
+    /** DATABASE **/
     public static final String HIBERNATE_CONNECTION_URL = properties.getProperty("hibernate.connection.url");
     public static final String HIBERNATE_CONNECTION_USERNAME = properties.getProperty("hibernate.connection.username");
     public static final String HIBERNATE_CONNECTION_PASSWORD = properties.getProperty("hibernate.connection.password");
+    public static final String FLYWAY_CONNECTION_URL = properties.getProperty("flyway.connection.url");
+    public static final String FLYWAY_CONNECTION_SCHEMA = properties.getProperty("flyway.connection.schema");
+    public static final String FLYWAY_CONNECTION_USERNAME = properties.getProperty("flyway.connection.username");
+    public static final String FLYWAY_CONNECTION_PASSWORD = properties.getProperty("flyway.connection.password");
 
     /** SKETCH LEARNING **/
     //todo loose the learning part or make it obvious it applies to applying sketches as well
