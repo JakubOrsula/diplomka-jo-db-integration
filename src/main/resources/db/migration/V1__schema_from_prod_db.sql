@@ -254,7 +254,14 @@ CREATE TABLE `TMPCachedDistsToPivots` (
 --
 DROP TABLE IF EXISTS `numberOfChainsWithoutMetadata`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `numberOfChainsWithoutMetadata`  AS SELECT `y`.`p2`- `x`.`p1` AS `number_of_chains_without_metadata` FROM ((select count(0) AS `p1` from (`proteinChainMetadata` `m` join `pivotSet` `p` on(`m`.`pivotSetId` = `p`.`id`)) where `p`.`currentlyUsed` = 1) `x` join (select count(0) AS `p2` from `proteinChain`) `y`) ;
+create definer = chain@`%` view numberOfChainsWithoutMetadata as
+select `y`.`p2` - `x`.`p1` AS `number_of_chains_without_metadata`
+from ((select count(0) AS `p1`
+       from (`protein_chain_db`.`proteinChainMetadata` `m` join `protein_chain_db`.`pivotSet` `p`
+             on (`m`.`pivotSetId` = `p`.`id`))
+       where `p`.`currentlyUsed` = 1) `x` join (select count(0) AS `p2` from `protein_chain_db`.`proteinChain`) `y`);
+
+
 
 -- --------------------------------------------------------
 
@@ -263,7 +270,28 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `number
 --
 DROP TABLE IF EXISTS `pivot64ForSketches`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `pivot64ForSketches`  AS SELECT `x`.`pivot1` AS `chainIntId`, `x`.`pivotSetId` AS `pivotSetId` FROM (select `pivotPairsFor64pSketches`.`pivotSetId` AS `pivotSetId`,`pivotPairsFor64pSketches`.`sketchBitOrder` AS `sketchBitOrder`,`pivotPairsFor64pSketches`.`pivot1` AS `pivot1`,`pivotPairsFor64pSketches`.`pivot2` AS `pivot2`,`pivotSet`.`id` AS `id`,`pivotSet`.`currentlyUsed` AS `currentlyUsed`,`pivotSet`.`added` AS `added` from (`pivotPairsFor64pSketches` join `pivotSet`) where `pivotSet`.`currentlyUsed` = 1) AS `x` ;
+create definer = chain@`%` view pivot64ForSketches as
+select `x`.`pivot1` AS `chainIntId`, `x`.`pivotSetId` AS `pivotSetId`
+from (select `protein_chain_db`.`pivotPairsFor64pSketches`.`pivotSetId`     AS `pivotSetId`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`sketchBitOrder` AS `sketchBitOrder`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`pivot1`         AS `pivot1`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`pivot2`         AS `pivot2`,
+             `protein_chain_db`.`pivotSet`.`id`                             AS `id`,
+             `protein_chain_db`.`pivotSet`.`currentlyUsed`                  AS `currentlyUsed`,
+             `protein_chain_db`.`pivotSet`.`added`                          AS `added`
+      from (`protein_chain_db`.`pivotPairsFor64pSketches` join `protein_chain_db`.`pivotSet`)
+      where `protein_chain_db`.`pivotSet`.`currentlyUsed` = 1) `x`
+union
+select `y`.`pivot2` AS `chainIntId`, `y`.`pivotSetId` AS `pivotSetId`
+from (select `protein_chain_db`.`pivotPairsFor64pSketches`.`pivotSetId`     AS `pivotSetId`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`sketchBitOrder` AS `sketchBitOrder`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`pivot1`         AS `pivot1`,
+             `protein_chain_db`.`pivotPairsFor64pSketches`.`pivot2`         AS `pivot2`,
+             `protein_chain_db`.`pivotSet`.`id`                             AS `id`,
+             `protein_chain_db`.`pivotSet`.`currentlyUsed`                  AS `currentlyUsed`,
+             `protein_chain_db`.`pivotSet`.`added`                          AS `added`
+      from (`protein_chain_db`.`pivotPairsFor64pSketches` join `protein_chain_db`.`pivotSet`)
+      where `protein_chain_db`.`pivotSet`.`currentlyUsed` = 1) `y`;
 
 -- --------------------------------------------------------
 
@@ -272,7 +300,30 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `pivot6
 --
 DROP TABLE IF EXISTS `pivot512ForSketches`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `pivot512ForSketches`  AS SELECT `x`.`pivot1` AS `chainIntId`, `x`.`pivotSetId` AS `pivotSetId` FROM (select `pivotPairsFor512pSketches`.`pivotSetId` AS `pivotSetId`,`pivotPairsFor512pSketches`.`sketchBitOrder` AS `sketchBitOrder`,`pivotPairsFor512pSketches`.`pivot1` AS `pivot1`,`pivotPairsFor512pSketches`.`pivot2` AS `pivot2`,`pivotSet`.`id` AS `id`,`pivotSet`.`currentlyUsed` AS `currentlyUsed`,`pivotSet`.`added` AS `added` from (`pivotPairsFor512pSketches` join `pivotSet`) where `pivotSet`.`currentlyUsed` = 1) AS `x` ;
+create definer = chain@`%` view pivot512ForSketches as
+select `x`.`pivot1` AS `chainIntId`, `x`.`pivotSetId` AS `pivotSetId`
+from (select `protein_chain_db`.`pivotPairsFor512pSketches`.`pivotSetId`     AS `pivotSetId`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`sketchBitOrder` AS `sketchBitOrder`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`pivot1`         AS `pivot1`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`pivot2`         AS `pivot2`,
+             `protein_chain_db`.`pivotSet`.`id`                              AS `id`,
+             `protein_chain_db`.`pivotSet`.`currentlyUsed`                   AS `currentlyUsed`,
+             `protein_chain_db`.`pivotSet`.`added`                           AS `added`
+      from (`protein_chain_db`.`pivotPairsFor512pSketches` join `protein_chain_db`.`pivotSet`)
+      where `protein_chain_db`.`pivotSet`.`currentlyUsed` = 1) `x`
+union
+select `y`.`pivot2` AS `chainIntId`, `y`.`pivotSetId` AS `pivotSetId`
+from (select `protein_chain_db`.`pivotPairsFor512pSketches`.`pivotSetId`     AS `pivotSetId`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`sketchBitOrder` AS `sketchBitOrder`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`pivot1`         AS `pivot1`,
+             `protein_chain_db`.`pivotPairsFor512pSketches`.`pivot2`         AS `pivot2`,
+             `protein_chain_db`.`pivotSet`.`id`                              AS `id`,
+             `protein_chain_db`.`pivotSet`.`currentlyUsed`                   AS `currentlyUsed`,
+             `protein_chain_db`.`pivotSet`.`added`                           AS `added`
+      from (`protein_chain_db`.`pivotPairsFor512pSketches` join `protein_chain_db`.`pivotSet`)
+      where `protein_chain_db`.`pivotSet`.`currentlyUsed` = 1) `y`;
+
+
 
 -- --------------------------------------------------------
 
@@ -281,7 +332,17 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `pivot5
 --
 DROP TABLE IF EXISTS `proteinChainMetadata_WithTrivialLongSketchForCurrentPivotSet`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `proteinChainMetadata_WithTrivialLongSketchForCurrentPivotSet`  AS SELECT `m`.`pivotSetId` AS `pivotSetId`, `m`.`chainIntId` AS `chainIntId`, `m`.`pivotDistances` AS `pivotDistances`, `m`.`sketch512p` AS `sketch512p`, `m`.`sketch64p` AS `sketch64p`, `m`.`lastUpdate` AS `lastUpdate` FROM (`proteinChainMetadata` `m` join `pivotSet` `p` on(`m`.`pivotSetId` = `p`.`id`)) WHERE `p`.`currentlyUsed` = 1 AND `m`.`sketch512p` = '{"sk1024_long":[0]}' ;
+create definer = chain@`%` view proteinChainMetadata_WithTrivialLongSketchForCurrentPivotSet as
+select `m`.`pivotSetId`     AS `pivotSetId`,
+       `m`.`chainIntId`     AS `chainIntId`,
+       `m`.`pivotDistances` AS `pivotDistances`,
+       `m`.`sketch512p`     AS `sketch512p`,
+       `m`.`sketch64p`      AS `sketch64p`,
+       `m`.`lastUpdate`     AS `lastUpdate`
+from (`protein_chain_db`.`proteinChainMetadata` `m` join `protein_chain_db`.`pivotSet` `p`
+      on (`m`.`pivotSetId` = `p`.`id`))
+where `p`.`currentlyUsed` = 1
+  and `m`.`sketch512p` = '{"sk1024_long":[0]}';
 
 -- --------------------------------------------------------
 
@@ -290,7 +351,10 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `protei
 --
 DROP TABLE IF EXISTS `proteinId`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `proteinId`  AS SELECT DISTINCT substr(`p`.`gesamtId`,1,4) AS `id` FROM `proteinChain` AS `p` WHERE `p`.`indexedAsDataObject` = 1 ;
+create definer = chain@`%` view proteinId as
+select distinct substr(`p`.`gesamtId`, 1, 4) AS `id`
+from `protein_chain_db`.`proteinChain` `p`
+where `p`.`indexedAsDataObject` = 1;
 
 -- --------------------------------------------------------
 
@@ -299,7 +363,14 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `protei
 --
 DROP TABLE IF EXISTS `randomQuery`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`admin`@`localhost` SQL SECURITY DEFINER VIEW `randomQuery`  AS SELECT `x`.`gesamtId` AS `gesamtId`, `x`.`chainLength` AS `chainLength` FROM (select `proteinChain`.`gesamtId` AS `gesamtId`,`proteinChain`.`chainLength` AS `chainLength` from `proteinChain` order by rand() limit 10) AS `x` ORDER BY `x`.`chainLength` ASC ;
+create definer = admin@localhost view randomQuery as
+select `x`.`gesamtId` AS `gesamtId`, `x`.`chainLength` AS `chainLength`
+from (select `protein_chain_db`.`proteinChain`.`gesamtId`    AS `gesamtId`,
+             `protein_chain_db`.`proteinChain`.`chainLength` AS `chainLength`
+      from `protein_chain_db`.`proteinChain`
+      order by rand()
+      limit 10) `x`
+order by `x`.`chainLength`;
 
 -- --------------------------------------------------------
 
@@ -308,7 +379,20 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`admin`@`localhost` SQL SECURITY DEFINER VIEW
 --
 DROP TABLE IF EXISTS `TMPCachedDistsToPivots`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`chain`@`%` SQL SECURITY DEFINER VIEW `TMPCachedDistsToPivots`  AS   (select `queriesNearestNeighboursStats`.`evaluationTime` AS `evaluationTime`,`queriesNearestNeighboursStats`.`added` AS `added`,`queriesNearestNeighboursStats`.`queryGesamtId` AS `queryGesamtId`,`queriesNearestNeighboursStats`.`nnGesamtId` AS `nnGesamtId`,`queriesNearestNeighboursStats`.`qscore` AS `qscore`,`queriesNearestNeighboursStats`.`rmsd` AS `rmsd`,`queriesNearestNeighboursStats`.`alignedResidues` AS `alignedResidues`,`queriesNearestNeighboursStats`.`seqIdentity` AS `seqIdentity` from `queriesNearestNeighboursStats` where `queriesNearestNeighboursStats`.`nnGesamtId` in (select `c`.`gesamtId` from ((`pivot512` join `pivotSet` `s`) join `proteinChain` `c`) where `s`.`currentlyUsed` = 1))  ;
+create definer = chain@`%` view TMPCachedDistsToPivots as
+(
+select `protein_chain_db`.`queriesNearestNeighboursStats`.`evaluationTime`  AS `evaluationTime`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`added`           AS `added`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`queryGesamtId`   AS `queryGesamtId`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`nnGesamtId`      AS `nnGesamtId`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`qscore`          AS `qscore`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`rmsd`            AS `rmsd`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`alignedResidues` AS `alignedResidues`,
+       `protein_chain_db`.`queriesNearestNeighboursStats`.`seqIdentity`     AS `seqIdentity`
+from `protein_chain_db`.`queriesNearestNeighboursStats`
+where `protein_chain_db`.`queriesNearestNeighboursStats`.`nnGesamtId` in (select `c`.`gesamtId`
+                                                                          from ((`protein_chain_db`.`pivot512` join `protein_chain_db`.`pivotSet` `s`) join `protein_chain_db`.`proteinChain` `c`)
+                                                                          where `s`.`currentlyUsed` = 1));
 
 --
 -- Indexy pro exportované tabulky
