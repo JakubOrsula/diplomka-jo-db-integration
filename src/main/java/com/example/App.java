@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.example.services.configuration.AppConfig;
 import com.example.services.configuration.Args;
 import com.example.services.entrypoints.applySketches.ApplySketches;
+import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
 import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
@@ -101,6 +102,14 @@ public class App
 
     }
 
+    private static void generatePivotPairs() {
+        try {
+            GeneratePivotCsvs.run("pivotPairsFor64pSketches.csv");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     //todo normal runner
     public static void main(String[] args) {
         Args arguments = new Args();
@@ -123,6 +132,7 @@ public class App
             case "learnSketches" -> learnSketches();
             case "applySketches" -> applySketches();
             case "secondaryFiltering" -> secondaryFiltering();
+            case "generatePivotPairs" -> generatePivotPairs();
             default ->
                     System.out.println("Invalid function name passed. Please check the function name and try again.");
         }

@@ -53,8 +53,10 @@ public class PivotPairsForXpSketchesDao {
     public List<String[]> loadPairs(PivotSet pivotSet, String storageTableName) {
         session.beginTransaction();
 
-        String sql = "select pivot1, pivot2 from protein_chain_db." + storageTableName + " order by sketchBitOrder asc";
-        List<Object[]> resultList = session.createNativeQuery(sql).getResultList();
+        String sql = "select pivot1, pivot2 from protein_chain_db." + storageTableName + " where pivotSetId=:pivotSetId order by sketchBitOrder asc";
+        List<Object[]> resultList = session.createNativeQuery(sql)
+                .setParameter("pivotSetId", pivotSet.getId())
+                .getResultList();
 
         List<String[]> pivotPairs = resultList.stream()
                 .map(objectArray -> Arrays.stream(objectArray)
