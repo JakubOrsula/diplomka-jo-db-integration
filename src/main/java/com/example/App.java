@@ -15,8 +15,7 @@ import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Hello world!
@@ -115,8 +114,38 @@ public class App
         GroundTruth.run();
     }
 
+    private static void loadLibrary(String libraryName) {
+        String resourcePath = "/lib/" + System.mapLibraryName(libraryName);
+
+        // Extract the resource to a temp file
+        try (InputStream in = App.class.getResourceAsStream(resourcePath)) {
+            if (in == null) {
+                throw new UnsatisfiedLinkError("The library " + libraryName + " was not found inside the JAR.");
+            }
+
+            File tempLib = File.createTempFile(libraryName, ".so");
+            tempLib.deleteOnExit(); // Ensures the file is deleted when the JVM exits
+
+            // Use try-with-resources to ensure all resources are closed
+            try (OutputStream out = new FileOutputStream(tempLib)) {
+                byte[] buffer = new byte[1024];
+                int readBytes;
+                while ((readBytes = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, readBytes);
+                }
+                out.flush(); // Ensure all changes are written before loading
+            }
+
+            // Load the library from the temp file
+            System.load(tempLib.getAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load the library", e);
+        }
+    }
+
     //todo normal runner
     public static void main(String[] args) {
+//        loadLibrary("ProteinDistance");
         Args arguments = new Args();
         JCommander.newBuilder()
                 .addObject(arguments)
