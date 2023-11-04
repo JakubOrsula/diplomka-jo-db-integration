@@ -6,6 +6,7 @@ import com.example.model.SimpleProtein;
 import com.example.service.PivotSetService;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class ProteinChainService {
     private final PivotSetService pivotSetService;
@@ -29,6 +30,11 @@ public class ProteinChainService {
     public Iterator<SimpleProtein> getProteinChainIterator(int limit) {
         var pivotSet = pivotSetService.GetCurrentPivotSet();
         return proteinChainDao.getProteinChainIterator(pivotSet, limit);
+    }
+
+    public List<SimpleProtein> getProteinsThatAreQueryObjects() {
+        var pivotSet = pivotSetService.GetCurrentPivotSet();
+        return proteinChainDao.getProteinsThatAreQueryObjects();
     }
 
 

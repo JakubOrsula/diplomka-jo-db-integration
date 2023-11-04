@@ -7,6 +7,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public abstract class ProteinChainDao {
     }
 
     private org.hibernate.query.Query getChainsSelectQuery(PivotSet pivotSet) {
-        return getChainsCoreQuery(pivotSet, "select p");
+        return getChainsCoreQuery(pivotSet, "select p.intId, p.gesamtId");
     }
 
 
@@ -37,7 +38,7 @@ public abstract class ProteinChainDao {
         session.beginTransaction();
         var query = getChainsSelectQuery(pivotSet);
         //the scroll mode is shit, it iterates the whole table at db. Use manual paging just like in pcms
-        List<ProteinChain> results = query.getResultList();
+        List<Object[]> results = query.getResultList();
         session.getTransaction().commit();
         //todo sql limit
         if (limit != -1 && results.size() >= limit) {
@@ -45,8 +46,16 @@ public abstract class ProteinChainDao {
             results = results.subList(0, limit);
         }
         return results.stream()
-                .map(pc -> new SimpleProtein(pc.getIntId(), pc.getGesamtId()))
+                .map(pc -> new SimpleProtein((Integer) pc[0], (String) pc[1]))
                 .iterator();
 
+    }
+
+    public List<SimpleProtein> getProteinsThatAreQueryObjects() {
+        var query = session.createQuery("select pc.intId, pc.gesamtId from QueryProtein qp join ProteinChain pc on qp.proteinChain.intId = pc.intId where pc.indexedAsDataObject = true");
+        List<Object[]> results = query.getResultList();
+
+        return results.stream()
+                .map(pc -> new SimpleProtein((Integer) pc[0], (String) pc[1])).toList();
     }
 }

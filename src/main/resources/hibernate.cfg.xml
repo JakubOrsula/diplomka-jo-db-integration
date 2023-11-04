@@ -14,5 +14,6 @@
         <mapping class="com.example.model.PivotSet"/>
         <mapping class="com.example.model.ProteinChainMetadata"/>
         <mapping class="com.example.model.PivotPairsFor64pSketches"/>
+        <mapping class="com.example.model.QueryProtein"/>
     </session-factory>
 </hibernate-configuration>

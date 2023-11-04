@@ -47,7 +47,9 @@ public class MetricSpacesStorageInterfaceDBImpl extends AbstractMetricSpacesStor
     // Object returned must be the same as pivot and query and object
     // todo we are not handling queryobjects currently
     public List<Object> getQueryObjects(String querySetName, Object... params) {
-        return new ArrayList<>();
+        var loadedQueryObjects = proteinChainService.getProteinsThatAreQueryObjects();
+        System.out.println("Loaded query objects: " + loadedQueryObjects.size());
+        return (List<Object>) (List<?>) loadedQueryObjects;
     }
 
     @Override
