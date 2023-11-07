@@ -9,7 +9,7 @@ import org.hibernate.SessionFactory;
 
 import java.io.File;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class ConsistencyCheck {
 

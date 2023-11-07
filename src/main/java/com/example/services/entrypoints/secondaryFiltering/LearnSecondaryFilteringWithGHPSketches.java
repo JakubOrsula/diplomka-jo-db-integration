@@ -22,10 +22,9 @@ import vm.metricSpace.distance.bounding.nopivot.storeLearned.SecondaryFilteringW
 import vm.metricSpace.distance.impl.HammingDistanceLongs;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Logger;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class LearnSecondaryFilteringWithGHPSketches {
 

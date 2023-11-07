@@ -1,7 +1,6 @@
 package com.example.services.entrypoints.applySketches;
 
 import com.example.dao.*;
-import com.example.model.SimpleProtein;
 import com.example.service.PivotPairsForXpSketchesService;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
@@ -20,7 +19,7 @@ import vm.objTransforms.storeLearned.GHPSketchingPivotPairsStoreInterface;
 
 import java.io.IOException;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class ApplySketches {
 

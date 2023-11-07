@@ -97,7 +97,7 @@
                 <manifest>
                   <addClasspath>true</addClasspath>
                   <classpathPrefix>lib/</classpathPrefix>
-                  <mainClass>com.example.App</mainClass>
+                  <mainClass>com.example.CliApp</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>

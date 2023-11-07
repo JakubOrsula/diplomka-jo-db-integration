@@ -10,7 +10,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class GeneratePivotCsvs {
     public static void run(String filename) throws IOException {

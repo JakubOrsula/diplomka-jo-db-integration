@@ -11,6 +11,7 @@ import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
 import com.example.services.entrypoints.selfchecks.GesamtLibIntegrationCheck;
+import com.example.services.entrypoints.updateDataset.UpdateDataset;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -21,7 +22,7 @@ import java.io.*;
  * Hello world!
  *
  */
-public class App
+public class CliApp
 {
 
     private static SessionFactory sessionFactory = null;
@@ -114,11 +115,21 @@ public class App
         GroundTruth.run();
     }
 
+    private static void updateDataset() {
+        UpdateDataset.run(
+                AppConfig.DATASET_REMOTE_URL,
+                AppConfig.DATASET_MIRROR_DIR,
+                AppConfig.DATASET_RAW_DIR,
+                AppConfig.DATASET_BINARY_DIR,
+                AppConfig.DATASET_UPDATE_SCRIPT_PATH,
+                AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
+    }
+
     private static void loadLibrary(String libraryName) {
         String resourcePath = "/lib/" + System.mapLibraryName(libraryName);
 
         // Extract the resource to a temp file
-        try (InputStream in = App.class.getResourceAsStream(resourcePath)) {
+        try (InputStream in = CliApp.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
                 throw new UnsatisfiedLinkError("The library " + libraryName + " was not found inside the JAR.");
             }
@@ -168,6 +179,7 @@ public class App
             case "secondaryFiltering" -> secondaryFiltering();
             case "generatePivotPairs" -> generatePivotPairs();
             case "groundTruth" -> groundTruth();
+            case "updateDataset" -> updateDataset();
             default ->
                     System.out.println("Invalid function name passed. Please check the function name and try again.");
         }

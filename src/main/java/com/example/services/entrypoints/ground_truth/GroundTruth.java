@@ -24,7 +24,7 @@ import vm.queryResults.QueryNearestNeighboursStoreInterface;
 
 import java.util.List;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class GroundTruth {
     public static void run() {

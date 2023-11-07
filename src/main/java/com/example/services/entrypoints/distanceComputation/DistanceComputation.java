@@ -16,7 +16,7 @@ import com.example.services.storage.MetricSpacesStorageInterfaceDBImpl;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class DistanceComputation {
     public static void computeDistances() {

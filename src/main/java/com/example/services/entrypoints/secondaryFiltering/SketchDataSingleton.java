@@ -7,7 +7,7 @@ import com.example.service.ProteinChainMetadataService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 //i hate singletons i hate singletons i hate singletons
 public class SketchDataSingleton {

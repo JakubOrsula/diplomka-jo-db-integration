@@ -19,7 +19,7 @@ import vm.objTransforms.storeLearned.GHPSketchingPivotPairsStoreInterface;
 
 import java.io.IOException;
 
-import static com.example.App.getSessionFactory;
+import static com.example.CliApp.getSessionFactory;
 
 public class LearnSketches {
 
