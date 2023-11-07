@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class AppConfig {
+    //todo maybe cli arg?
     private static final String PROPERTIES_FILE = "run.properties";
     private static final Properties properties = new Properties();
 
@@ -56,6 +57,16 @@ public class AppConfig {
     public static final String FLYWAY_CONNECTION_SCHEMA = properties.getProperty("flyway.connection.schema");
     public static final String FLYWAY_CONNECTION_USERNAME = properties.getProperty("flyway.connection.username");
     public static final String FLYWAY_CONNECTION_PASSWORD = properties.getProperty("flyway.connection.password");
+
+    /** DATASET UPDATE **/
+    public static final String DATASET_REMOTE_URL = properties.getProperty("dataset.remote_url");
+    public static final String DATASET_MIRROR_DIR = properties.getProperty("dataset.mirror_dir");
+    public static final String DATASET_RAW_DIR = properties.getProperty("dataset.raw_dir");
+    public static final String DATASET_BINARY_DIR = properties.getProperty("dataset.binary_dir");
+    public static final String DATASET_UPDATE_SCRIPT_PATH = properties.getProperty("dataset.update_script_path");
+
+    /** SUB CONFIGS **/
+    public static final String SUBCONFIGS_PYTHON_INI_CONFIG_PATH = properties.getProperty("subconfigs.python_ini_config_path");
 
     /** SKETCH LEARNING **/
     //todo loose the learning part or make it obvious it applies to applying sketches as well
