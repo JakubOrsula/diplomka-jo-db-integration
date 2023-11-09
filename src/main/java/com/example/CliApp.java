@@ -5,6 +5,7 @@ import com.example.services.configuration.AppConfig;
 import com.example.services.configuration.Args;
 import com.example.services.entrypoints.applySketches.ApplySketches;
 import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
+import com.example.services.entrypoints.generateSubConfigs.GenerateSubConfigs;
 import com.example.services.entrypoints.ground_truth.GroundTruth;
 import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
@@ -18,6 +19,9 @@ import org.hibernate.cfg.Configuration;
 
 import java.io.*;
 
+import static com.example.services.utils.DatabaseUtils.buildSessionFactory;
+import static com.example.services.utils.DatabaseUtils.migrate;
+
 /**
  * Hello world!
  *
@@ -27,35 +31,8 @@ public class CliApp
 
     private static SessionFactory sessionFactory = null;
 
-    private static SessionFactory buildSessionFactory() {
-        try {
-            Configuration configuration = new Configuration();
-
-            // Set the connection details from the configuration class
-            configuration.setProperty("hibernate.connection.url", AppConfig.HIBERNATE_CONNECTION_URL);
-            configuration.setProperty("hibernate.connection.username", AppConfig.HIBERNATE_CONNECTION_USERNAME);
-            configuration.setProperty("hibernate.connection.password", AppConfig.HIBERNATE_CONNECTION_PASSWORD);
-            configuration.configure("hibernate.cfg.xml");
-
-            return configuration.buildSessionFactory();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to build the SessionFactory.", e);
-        }
-    }
-
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
-    }
-
-    public static void migrate() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(AppConfig.FLYWAY_CONNECTION_URL,
-                        AppConfig.FLYWAY_CONNECTION_USERNAME,
-                        AppConfig.FLYWAY_CONNECTION_PASSWORD)
-                .defaultSchema(AppConfig.FLYWAY_CONNECTION_SCHEMA)
-                .locations("classpath:/db/migration")
-                .load();
-        flyway.migrate();
     }
 
     /**
@@ -125,6 +102,10 @@ public class CliApp
                 AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
     }
 
+    private static void generateSubConfigs() {
+        GenerateSubConfigs.run(AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
+    }
+
     private static void loadLibrary(String libraryName) {
         String resourcePath = "/lib/" + System.mapLibraryName(libraryName);
 
@@ -180,6 +161,7 @@ public class CliApp
             case "generatePivotPairs" -> generatePivotPairs();
             case "groundTruth" -> groundTruth();
             case "updateDataset" -> updateDataset();
+            case "generateSubConfigs" -> generateSubConfigs();
             default ->
                     System.out.println("Invalid function name passed. Please check the function name and try again.");
         }

@@ -1,10 +1,12 @@
 package com.example.services.configuration;
 
+import com.example.utils.UnrecoverableError;
 import org.hibernate.boot.cfgxml.internal.ConfigLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 public class AppConfig {
@@ -29,7 +31,18 @@ public class AppConfig {
                 inputStream.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new UnrecoverableError("Failed to load run.properties file. Make sure properties file is next .jar you are trying to run", e);
+        }
+    }
+
+    /** META **/
+    public static final String WORKING_DIRECTORY;
+
+    static {
+        try {
+            WORKING_DIRECTORY = new File(AppConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -50,13 +63,25 @@ public class AppConfig {
     public static final int COMPUTE_CHAIN_TO = Integer.parseInt(properties.getProperty("COMPUTE_CHAIN_TO"));
 
     /** DATABASE **/
-    public static final String HIBERNATE_CONNECTION_URL = properties.getProperty("hibernate.connection.url");
-    public static final String HIBERNATE_CONNECTION_USERNAME = properties.getProperty("hibernate.connection.username");
-    public static final String HIBERNATE_CONNECTION_PASSWORD = properties.getProperty("hibernate.connection.password");
-    public static final String FLYWAY_CONNECTION_URL = properties.getProperty("flyway.connection.url");
-    public static final String FLYWAY_CONNECTION_SCHEMA = properties.getProperty("flyway.connection.schema");
+    public static final String DATABASE_DRIVER = properties.getProperty("database.driver");
+    public static final String DATABASE_ADDRESS = properties.getProperty("database.address");
+    public static final String DATABASE_NAME = properties.getProperty("database.name");
+    public static final String DATABASE_USERNAME = properties.getProperty("database.username");
+    public static final String DATABASE_PASSWORD = properties.getProperty("database.password");
     public static final String FLYWAY_CONNECTION_USERNAME = properties.getProperty("flyway.connection.username");
     public static final String FLYWAY_CONNECTION_PASSWORD = properties.getProperty("flyway.connection.password");
+
+    /** MESSIFF **/
+    public static final String MESSIFF_SHORT_SKETCHES_PORT = properties.getProperty("messiff.short_sketches.port");
+    public static final String MESSIFF_LONG_SKETCHES_PORT = properties.getProperty("messiff.long_sketches.port");
+    public static final String MESSIFF_PPP_CODES_PORT = properties.getProperty("messiff.ppp_codes.port");
+    public static final String MESSIFF_TMP_DIR = properties.getProperty("messiff.tmp_dir");
+    public static final String MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT = properties.getProperty("messiff.short_sketches.manager_script");
+    public static final String MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT = properties.getProperty("messiff.long_sketches.manager_script");
+    public static final String MESSIFF_PPP_CODES_MANAGER_SCRIPT = properties.getProperty("messiff.ppp_codes.manager_script");
+
+    /** FLASK APP **/
+    public static final String FLASK_LOCATION = properties.getProperty("flask.location");
 
     /** DATASET UPDATE **/
     public static final String DATASET_REMOTE_URL = properties.getProperty("dataset.remote_url");

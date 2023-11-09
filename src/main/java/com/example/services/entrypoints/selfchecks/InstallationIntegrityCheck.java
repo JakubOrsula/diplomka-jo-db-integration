@@ -2,11 +2,9 @@ package com.example.services.entrypoints.selfchecks;
 
 import com.example.services.configuration.AppConfig;
 
-import static java.lang.Runtime.getRuntime;
-
 public class InstallationIntegrityCheck {
 
-    private static boolean checkParentDirectoriesSetup() {
+    private static boolean checkDatasetDirectoriesSetup() {
         var checkParents = new String[]{
                 AppConfig.DATASET_MIRROR_DIR,
                 AppConfig.DATASET_RAW_DIR,
@@ -43,7 +41,75 @@ public class InstallationIntegrityCheck {
         return true;
     }
 
+    private static boolean checkDependenciesPresence() {
+        var base_path = AppConfig.WORKING_DIRECTORY + "/" + "dependencies";
+        var paths = new String[]{
+                base_path,
+                base_path + "/" + "gesamt",
+                base_path + "/" + "tbb",
+                base_path + "/" + "mics-proteins",
+                base_path + "/" + "mics-proteins" + "/" + "jars",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "algs",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "csvPivotPairs",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "logs",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "pids",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "Threshold_tables",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http-api.cf",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_64pivots.defaults",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_64pivots.sh",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_512pivots.defaults",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_512pivots.sh",
+                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "rebuildPPPCodes.sh",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "algs",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "csvPivotPairs",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http.defaults",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http.sh",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http-api.cf",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "manager-pppcodes.cf",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "mindex.cf",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.cf",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.defaults",
+                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.sh",
+        };
+
+        for (var path: paths) {
+            if (!new java.io.File(path).exists()) {
+                System.out.println("Installation integrity check failed: " + path + " does not exist");
+                System.out.println("Dependencies folder must be set up. See readme for more info");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkCppDependenciesPresence() {
+        var path = AppConfig.WORKING_DIRECTORY + "/dependencies/build/distance/libProteinDistance.so";
+        if (!new java.io.File(path).exists()) {
+            System.out.println("Installation integrity check failed: " + path + " does not exist");
+            System.out.println("The gesamt library failed to build on jo-integration branch. See the install.sh script" +
+                    " and try to install gesamt library manually");
+            return false;
+        }
+
+        path = "/usr/local/lib/libProteinDistance.so";
+        if (!new java.io.File(path).exists()) {
+            System.out.println("Installation integrity check failed: " + path + " does not exist");
+            System.out.println("The gesamt library failed to build on jo-integration branch. See the install.sh script" +
+                    " and try to install gesamt library manually");
+            return false;
+        }
+        return true;
+    }
+
+
     public static boolean run() {
-        return checkParentDirectoriesSetup() && checkAvailableCPUs();
+        if (checkDatasetDirectoriesSetup() && checkAvailableCPUs() && checkDependenciesPresence() && checkCppDependenciesPresence()) {
+            System.out.println("Installation integrity check passed");
+            return true;
+        }
+        System.out.println("Installation integrity check failed");
+        return false;
     }
 }
