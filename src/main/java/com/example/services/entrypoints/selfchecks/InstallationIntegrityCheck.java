@@ -24,7 +24,8 @@ public class InstallationIntegrityCheck {
             var parent = checkParentFile.getParentFile();
             if (!parent.exists()) {
                 System.out.println("Installation integrity check failed: " + parent + " does not exist");
-                System.out.println("Parent folders must be set up before running this program");
+                System.out.println("Parent folders for datasets must be set up before running this program");
+                System.out.println("Hint: you need hundreds of GBs of free space for these dirs");
                 return false;
             }
         }
@@ -70,7 +71,8 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.cf",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.defaults",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.sh",
-
+                base_path + "/" + "ProteinSearch",
+                base_path + "/" + "ProteinSearch" + "/" + "venv" + "/" + "bin" + "activate",
         };
 
         for (var path: paths) {

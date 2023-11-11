@@ -23,9 +23,8 @@ import static com.example.CliApp.getSessionFactory;
 
 public class LearnSketches {
 
-    public static void run() throws IOException {
-        try (SessionFactory sessionFactory = getSessionFactory();
-             Session session = sessionFactory.openSession()) {
+    public static void run(SessionFactory sessionFactory) throws IOException {
+        try (Session session = sessionFactory.openSession()) {
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
             var pivotPairsForXpSketchesService = new PivotPairsForXpSketchesService(pivotSetService, new PivotPairsForXpSketchesDao(session));

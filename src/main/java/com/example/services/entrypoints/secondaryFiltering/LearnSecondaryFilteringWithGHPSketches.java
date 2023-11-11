@@ -58,12 +58,8 @@ public class LearnSecondaryFilteringWithGHPSketches {
         return dataset;
     }
 
-    public static void start() {
-        try (SessionFactory sessionFactory = getSessionFactory();
-             Session session = sessionFactory.openSession()) {
-
-
-            int sketchLength = 1024;
+    public static void start(SessionFactory sessionFactory, int sketchLength) {
+        try (Session session = sessionFactory.openSession()) {
             Dataset fullDataset = createProteinDataset(session);
             Dataset sketchesDataset = createSketchDataset(session);
             float distIntervalForPX = 0.01f;

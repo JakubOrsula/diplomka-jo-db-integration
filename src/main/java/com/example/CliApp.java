@@ -37,9 +37,9 @@ public class CliApp
     /**
      * Checks whether all distances were computed and if not how many are missing.
      */
-    private static void checkComputedDistances() {
+    private static void checkComputedDistances(SessionFactory sessionFactory) {
 
-        ConsistencyCheck.CheckComputedDistances();
+        ConsistencyCheck.CheckComputedDistances(sessionFactory);
     }
 
     private static void checkGesamtLibPresence() {
@@ -47,40 +47,40 @@ public class CliApp
     }
 
     private static void checkGesamtBinaryFilesAreInDB() {
-        ConsistencyCheck.CheckGesamtBinaryFilesAreInDB(new File(AppConfig.PDBE_BINARY_FILES_DIR));
+        ConsistencyCheck.CheckGesamtBinaryFilesAreInDB(new File(AppConfig.DATASET_BINARY_DIR));
     }
 
     private static void removeProteinChainsWithoutFile(boolean dryRun) {
         ConsistencyCheck.RemoveProteinChainsWithoutFile(dryRun);
     }
 
-    private static void computeDistances() {
-        DistanceComputation.computeDistances();
+    private static void computeDistances(SessionFactory sf) {
+        DistanceComputation.computeDistances(sf);
     }
 
-    private static void learnSketches() {
+    private static void learnSketches(SessionFactory sf) {
         try {
-            LearnSketches.run();
+            LearnSketches.run(sf);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void applySketches() {
+    private static void applySketches(SessionFactory sessionFactory) {
         try {
-            ApplySketches.run(AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
+            ApplySketches.run(sessionFactory, AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void secondaryFiltering() {
-        LearnSecondaryFilteringWithGHPSketches.start();
+    private static void secondaryFiltering(SessionFactory sessionFactory) {
+        LearnSecondaryFilteringWithGHPSketches.start(sessionFactory, 1024);
 
     }
 
-    private static void generatePivotPairs(Session session) {
-        GeneratePivotCsvs.run(session, "pivotPairsFor64pSketches.csv", "pivotPairsFor512pSketches");
+    private static void generatePivotPairs(SessionFactory sessionFactory) {
+        GeneratePivotCsvs.run(sessionFactory, "pivotPairsFor64pSketches.csv", "pivotPairsFor512pSketches");
 
     }
 
@@ -148,14 +148,14 @@ public class CliApp
         try (var session = sessionFactory.openSession()) {
             switch (arguments.runFunction) {
                 case "checkGesamtLibPresence" -> checkGesamtLibPresence();
-                case "checkComputedDistances" -> checkComputedDistances();
+                case "checkComputedDistances" -> checkComputedDistances(sessionFactory);
                 case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
                 case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
-                case "computeDistances" -> computeDistances();
-                case "learnSketches" -> learnSketches();
-                case "applySketches" -> applySketches();
-                case "secondaryFiltering" -> secondaryFiltering();
-                case "generatePivotPairs" -> generatePivotPairs(session);
+                case "computeDistances" -> computeDistances(sessionFactory);
+                case "learnSketches" -> learnSketches(sessionFactory);
+                case "applySketches" -> applySketches(sessionFactory);
+                case "secondaryFiltering" -> secondaryFiltering(sessionFactory);
+                case "generatePivotPairs" -> generatePivotPairs(sessionFactory);
                 case "groundTruth" -> groundTruth();
                 case "updateDataset" -> updateDataset();
                 case "generateSubConfigs" -> generateSubConfigs();

@@ -34,7 +34,7 @@ public class BinaryAndDBConsistencyFixer {
                 continue;
             }
             String fileName =
-                    AppConfig.PDBE_BINARY_FILES_DIR + "/" +
+                    AppConfig.DATASET_BINARY_DIR + "/" +
                     gesamtId.substring(1, 3).toLowerCase() + "/" +
                     gesamtId + ".bin";
 

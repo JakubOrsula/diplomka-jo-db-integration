@@ -31,9 +31,8 @@ public class ApplySketches {
      * @param sketchesLength - witch sketches should be computed
      * @throws IOException
      */
-    public static void run(int sketchesLength) throws IOException {
-        try (SessionFactory sessionFactory = getSessionFactory();
-             Session session = sessionFactory.openSession()) {
+    public static void run(SessionFactory sessionFactory, int sketchesLength) throws IOException {
+        try (Session session = sessionFactory.openSession()) {
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
             var pivotPairsForXpSketchesService = new PivotPairsForXpSketchesService(pivotSetService, new PivotPairsForXpSketchesDao(session));

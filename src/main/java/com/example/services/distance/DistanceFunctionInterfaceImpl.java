@@ -6,7 +6,7 @@ import vm.metricSpace.distance.DistanceFunctionInterface;
 public class DistanceFunctionInterfaceImpl<T> extends DistanceFunctionInterface<String> {
 
     public DistanceFunctionInterfaceImpl() {
-        ProteinNativeQScoreDistance.initDistance(AppConfig.PDBE_BINARY_FILES_DIR);
+        ProteinNativeQScoreDistance.initDistance(AppConfig.DATASET_BINARY_DIR);
     }
 
     @Override

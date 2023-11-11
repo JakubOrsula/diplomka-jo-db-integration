@@ -38,10 +38,9 @@ public class ConsistencyCheck {
         }
     }
 
-    public static void CheckComputedDistances() {
+    public static void CheckComputedDistances(SessionFactory sessionFactory) {
         System.out.println("Getting total proteins and proteins with valid distances counts. This process will take a long time...");
-        try (SessionFactory sessionFactory = getSessionFactory();
-             Session session = sessionFactory.openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             var totalProteins = session.createQuery("select count(*) from ProteinChain where indexedAsDataObject=true ", Long.class).getSingleResult();
 
             var pService = new ProteinChainService(new PivotSetService(new PivotSetDao(session)), new ProteinChainForLearningSketchesDao(session));

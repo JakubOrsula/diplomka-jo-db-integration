@@ -35,8 +35,9 @@ public class AppConfig {
         }
     }
 
-    /** META **/
+    /** DAEMON **/
     public static final String WORKING_DIRECTORY;
+    public static final int DAEMON_UPDATE_TRIGGER_HOUR = Integer.parseInt(properties.getProperty("DAEMON_UPDATE_TRIGGER_HOUR"));
 
     static {
         try {
@@ -45,10 +46,7 @@ public class AppConfig {
             throw new RuntimeException(e);
         }
     }
-
-    /** COMMON **/
     public static boolean DRY_RUN;
-    public static final String PDBE_BINARY_FILES_DIR = properties.getProperty("PDBE_BINARY_FILES_DIR");
 
     /** DISTANCE **/
     public static final float GESAMT_COMPUTATION_CUTOFF_THRESHOLD = Float.parseFloat(properties.getProperty("GESAMT_COMPUTATION_CUTOFF_THRESHOLD"));
@@ -102,9 +100,10 @@ public class AppConfig {
     // Use freely to find suitable correlations, Mic used 100 000.
     public static final int SKETCH_LEARNING_SAMPLE_SIZE = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SAMPLE_SIZE"));
     // Number of bits used for sketch. Mic used 64 and 1024. Determines how long the operations with sketches will take.
-    public static final int SKETCH_LEARNING_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SKETCH_LENGTH"));
+    // Unfortunately they have to be mutable to compute two different sketch lengths in one run. VMMetricSpaceTechnique needs a singleton to hold configuration :(
+    public static int SKETCH_LEARNING_SKETCH_LENGTH = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_SKETCH_LENGTH"));
     // Number of pivots to find suitable pairs
-    public static final int SKETCH_LEARNING_PIVOTS_COUNT = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_PIVOTS_COUNT"));
+    public static int SKETCH_LEARNING_PIVOTS_COUNT = Integer.parseInt(properties.getProperty("SKETCH_LEARNING_PIVOTS_COUNT"));
     // What should be the ratio of 1s to 0s in one column of the matrix? Mic used 0.5 - meaning same count of 1s and 0s
     public static final float SKETCH_LEARNING_BALANCE = Float.parseFloat(properties.getProperty("SKETCH_LEARNING_BALANCE"));
 

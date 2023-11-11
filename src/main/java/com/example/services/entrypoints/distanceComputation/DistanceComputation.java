@@ -19,10 +19,8 @@ import org.hibernate.SessionFactory;
 import static com.example.CliApp.getSessionFactory;
 
 public class DistanceComputation {
-    public static void computeDistances() {
-        try (SessionFactory sessionFactory = getSessionFactory();
-             Session session = sessionFactory.openSession()) {
-
+    public static void computeDistances(SessionFactory sessionFactory) {
+        try (Session session = sessionFactory.openSession()) {
             var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new DistanceFunctionInterfaceImpl<String>());
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
@@ -32,6 +30,7 @@ public class DistanceComputation {
             var dataset = new DatasetImpl<String>("proteinChain", metricSpace, metricSpaceStorage);
             var evaluator = new EvalAndStoreObjectsToPivotsDists(session, pivotSetService);
             evaluator.run(dataset);
+
         }
     }
 }
