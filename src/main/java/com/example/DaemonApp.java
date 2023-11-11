@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.services.configuration.AppConfig;
+import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
 import com.example.services.entrypoints.selfchecks.InstallationIntegrityCheck;
 
 import static com.example.services.utils.DatabaseUtils.buildSessionFactory;
@@ -20,6 +21,12 @@ public class DaemonApp {
         //installation integrity check
         InstallationIntegrityCheck.run();
 
+        //update pivot csvs
+        try (var session = sessionFactory.openSession()) {
+            GeneratePivotCsvs.run(session, "test.csv", "test");
+        }
+        
+
         //start the messiffs
 
 
@@ -27,5 +34,7 @@ public class DaemonApp {
 
         //start the update loop
 
+        //cleanup
+        sessionFactory.close();
     }
 }

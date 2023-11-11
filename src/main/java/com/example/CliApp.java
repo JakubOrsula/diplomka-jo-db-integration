@@ -13,9 +13,8 @@ import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
 import com.example.services.entrypoints.selfchecks.GesamtLibIntegrationCheck;
 import com.example.services.entrypoints.updateDataset.UpdateDataset;
-import org.flywaydb.core.Flyway;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 import java.io.*;
 
@@ -80,12 +79,9 @@ public class CliApp
 
     }
 
-    private static void generatePivotPairs() {
-        try {
-            GeneratePivotCsvs.run("pivotPairsFor64pSketches.csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private static void generatePivotPairs(Session session) {
+        GeneratePivotCsvs.run(session, "pivotPairsFor64pSketches.csv", "pivotPairsFor512pSketches");
+
     }
 
     private static void groundTruth() {
@@ -149,21 +145,22 @@ public class CliApp
         migrate();
         sessionFactory = buildSessionFactory();
 
-        switch (arguments.runFunction) {
-            case "checkGesamtLibPresence" -> checkGesamtLibPresence();
-            case "checkComputedDistances" -> checkComputedDistances();
-            case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
-            case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
-            case "computeDistances" -> computeDistances();
-            case "learnSketches" -> learnSketches();
-            case "applySketches" -> applySketches();
-            case "secondaryFiltering" -> secondaryFiltering();
-            case "generatePivotPairs" -> generatePivotPairs();
-            case "groundTruth" -> groundTruth();
-            case "updateDataset" -> updateDataset();
-            case "generateSubConfigs" -> generateSubConfigs();
-            default ->
-                    System.out.println("Invalid function name passed. Please check the function name and try again.");
+        try (var session = sessionFactory.openSession()) {
+            switch (arguments.runFunction) {
+                case "checkGesamtLibPresence" -> checkGesamtLibPresence();
+                case "checkComputedDistances" -> checkComputedDistances();
+                case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
+                case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
+                case "computeDistances" -> computeDistances();
+                case "learnSketches" -> learnSketches();
+                case "applySketches" -> applySketches();
+                case "secondaryFiltering" -> secondaryFiltering();
+                case "generatePivotPairs" -> generatePivotPairs(session);
+                case "groundTruth" -> groundTruth();
+                case "updateDataset" -> updateDataset();
+                case "generateSubConfigs" -> generateSubConfigs();
+                default -> System.out.println("Invalid function name passed. Please check the function name and try again.");
+            }
         }
     }
 }

@@ -34,8 +34,6 @@ public class LearnSecondaryFilteringWithGHPSketches {
     private static DatasetImpl<String> createProteinDataset(Session session) {
         var pivotSetService = new PivotSetService(new PivotSetDao(session));
         var pivotService = new PivotService(new PivotDao(session), pivotSetService);
-        var sampleSize = AppConfig.SKETCH_LEARNING_SAMPLE_SIZE; //todo better differentiate from LearnSketches
-        var numberOfPivots = AppConfig.SKETCH_LEARNING_PIVOTS_COUNT;
         var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new DistanceFunctionInterfaceImpl<String>());
         //we don't want the code to interact directly with db
         var proteinChainService = new ProteinChainService(pivotSetService, new ProteinChainForLearningSketchesDao(session));
@@ -49,8 +47,6 @@ public class LearnSecondaryFilteringWithGHPSketches {
     private static DatasetImpl<long[]> createSketchDataset(Session session) {
         var pivotSetService = new PivotSetService(new PivotSetDao(session));
         var pivotService = new PivotService(new PivotDao(session), pivotSetService);
-        var sampleSize = AppConfig.SKETCH_LEARNING_SAMPLE_SIZE; //todo better differentiate from LearnSketches
-        var numberOfPivots = AppConfig.SKETCH_LEARNING_PIVOTS_COUNT;
 
         var metricSpace = new SketchAbstractMetricSpaceDBImpl(new HammingDistanceLongs());
         //we don't want the code to interact directly with db

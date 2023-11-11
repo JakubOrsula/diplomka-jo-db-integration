@@ -72,6 +72,7 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.cf",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.defaults",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.sh",
+                //todo csv dirs paths
         };
 
         for (var path: paths) {
