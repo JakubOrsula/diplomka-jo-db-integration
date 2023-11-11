@@ -79,6 +79,10 @@ public class AppConfig {
     public static final String MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT = properties.getProperty("messiff.short_sketches.manager_script");
     public static final String MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT = properties.getProperty("messiff.long_sketches.manager_script");
     public static final String MESSIFF_PPP_CODES_MANAGER_SCRIPT = properties.getProperty("messiff.ppp_codes.manager_script");
+    public static final String MESSIFF_SKETCHES_SHORT_CSV = properties.getProperty("messiff.sketches.short_csv");
+    public static final String MESSIFF_SKETCHES_LONG_CSV = properties.getProperty("messiff.sketches.long_csv");
+    public static final String MESSIFF_PPP_CODES_SHORT_CSV = properties.getProperty("messiff.ppp_codes.short_csv");
+    public static final String MESSIFF_PPP_CODES_LONG_CSV = properties.getProperty("messiff.ppp_codes.long_csv");
 
     /** FLASK APP **/
     public static final String FLASK_LOCATION = properties.getProperty("flask.location");

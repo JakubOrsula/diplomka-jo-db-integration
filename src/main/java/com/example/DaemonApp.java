@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.service.PivotPairsForXpSketchesService;
 import com.example.services.configuration.AppConfig;
 import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
 import com.example.services.entrypoints.selfchecks.InstallationIntegrityCheck;
@@ -23,7 +24,10 @@ public class DaemonApp {
 
         //update pivot csvs
         try (var session = sessionFactory.openSession()) {
-            GeneratePivotCsvs.run(session, "test.csv", "test");
+            GeneratePivotCsvs.run(session, AppConfig.MESSIFF_SKETCHES_SHORT_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(64));
+            GeneratePivotCsvs.run(session, AppConfig.MESSIFF_SKETCHES_LONG_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(512));
+            GeneratePivotCsvs.run(session, AppConfig.MESSIFF_PPP_CODES_SHORT_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(64));
+            GeneratePivotCsvs.run(session, AppConfig.MESSIFF_PPP_CODES_LONG_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(512));
         }
         
 

@@ -52,7 +52,6 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "algs",
-                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "csvPivotPairs",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "logs",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "pids",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "Threshold_tables",
@@ -63,7 +62,6 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_512pivots.sh",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "rebuildPPPCodes.sh",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "algs",
-                base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "csvPivotPairs",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http.defaults",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http.sh",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "http-api.cf",
@@ -72,7 +70,7 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.cf",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.defaults",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.sh",
-                //todo csv dirs paths
+
         };
 
         for (var path: paths) {

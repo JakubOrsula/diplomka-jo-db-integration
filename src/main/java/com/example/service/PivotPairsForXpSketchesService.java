@@ -17,13 +17,17 @@ public class PivotPairsForXpSketchesService {
         this.pivotPairsForXpSketchesDao = pivotPairsForXpSketchesDao;
     }
 
-    private String tableNameBasedOnPivotCount() {
-        var pivotCount = AppConfig.SKETCH_LEARNING_PIVOTS_COUNT;
+    public static String tableNameBasedOnPivotCount(int pivotCount) {
         return switch (pivotCount) {
             case 64 -> "pivotPairsFor64pSketches";
             case 512 -> "pivotPairsFor512pSketches";
             default -> throw new Error("unknown pivot count");
         };
+    }
+
+
+    public static String tableNameBasedOnPivotCount() {
+        return tableNameBasedOnPivotCount(AppConfig.SKETCH_LEARNING_PIVOTS_COUNT);
     }
 
     private long pairsCount() {

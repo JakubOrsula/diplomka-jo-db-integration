@@ -27,5 +27,6 @@ public class GeneratePivotCsvs {
         } catch (IOException e) {
             throw new UnrecoverableError("Failed to write the csv.", e);
         }
+        System.out.println("Pivot csv " + filename  + " generated.");
     }
 }
