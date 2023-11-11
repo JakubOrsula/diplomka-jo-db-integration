@@ -18,6 +18,8 @@ import org.hibernate.SessionFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import static com.example.services.utils.DatabaseUtils.buildSessionFactory;
 import static com.example.services.utils.DatabaseUtils.migrate;
@@ -25,7 +27,7 @@ import static com.example.services.utils.DatabaseUtils.migrate;
 public class DaemonApp {
     private final static FlaskAppController controller = new FlaskAppController();
 
-    public static void bootstrap(SessionFactory sessionFactory) {
+    public static void bootstrap(SessionFactory sessionFactory) throws IOException {
         //installation integrity check
         InstallationIntegrityCheck.run();
 
@@ -36,18 +38,19 @@ public class DaemonApp {
         // new update is needed only when new pivotset is picked
         GeneratePivotCsvs.run(sessionFactory, AppConfig.MESSIFF_SKETCHES_SHORT_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(64));
         GeneratePivotCsvs.run(sessionFactory, AppConfig.MESSIFF_SKETCHES_LONG_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(512));
-        GeneratePivotCsvs.run(sessionFactory, AppConfig.MESSIFF_PPP_CODES_SHORT_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(64));
-        GeneratePivotCsvs.run(sessionFactory, AppConfig.MESSIFF_PPP_CODES_LONG_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(512));
+        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_SHORT_CSV).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_SHORT_CSV).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_LONG_CSV).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_LONG_CSV).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
     }
 
     public static void restartMessiffs() throws InterruptedException {
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
         Thread.sleep(3*1000);
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "start"});
-        SystemUtils.exec(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "start"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "start"});
+        SystemUtils.exec(new File(AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "start"});
         Thread.sleep(3*1000);
     }
 
@@ -63,7 +66,7 @@ public class DaemonApp {
         controller.startFlaskApp(AppConfig.FLASK_LOCATION);
     }
 
-    private static void updateDataset(SessionFactory sessionFactory) throws IOException {
+    private static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
         System.out.println("Update dataset: Going to fetch remote files");
         UpdateDataset.updateFiles(AppConfig.DATASET_REMOTE_URL, AppConfig.DATASET_MIRROR_DIR, AppConfig.DATASET_RAW_DIR, AppConfig.DATASET_BINARY_DIR, AppConfig.DATASET_UPDATE_SCRIPT_PATH, AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
         System.out.println("Update dataset: Remote file fetched, unzipped and inserted into database");
@@ -97,7 +100,40 @@ public class DaemonApp {
         ApplySketches.run(sessionFactory, AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
         System.out.println("Update dataset: Long sketches applied");
 
+        System.out.println("Update dataset: Create datasets for messiff");
+        SystemUtils.exec(new String[]{
+                "java",
+                "--add-opens",
+                "java.base/java.lang.invoke=ALL-UNNAMED",
+                "-jar",
+                AppConfig.PROTEINS_JAR_LOCATION,
+                AppConfig.MESSIFF_SKETCHES_SHORT_BIN,
+                AppConfig.MESSIFF_SKETCHES_LONG_BIN,
+                AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH
+        });
+        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_SHORT_BIN).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_SHORT_BIN).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_LONG_BIN).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_LONG_BIN).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("Update dataset: Datasets for messiff created");
 
+        System.out.println("Update dataset: Going to generate ppp codes");
+        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
+                new String[]{
+                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
+                        "murder"
+        });
+        Thread.sleep(3*1000);
+        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
+                new String[]{
+                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
+                        "start"
+        });
+        Thread.sleep(10*1000);
+        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
+                new String[]{
+                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
+                        "stop"
+        });
+        System.out.println("Update dataset: PPP codes generated");
 
 //        System.out.println("Update dataset: Going to generate secondary filtering csvs");
 //        LearnSecondaryFilteringWithGHPSketches.start(sessionFactory, 1024);
@@ -107,11 +143,6 @@ public class DaemonApp {
     public static void main(String[] args) {
         System.out.println("Daemon started");
 
-        if (AppConfig.DRY_RUN) {
-            System.out.println("Dry run mode not supported for daemon.");
-            System.exit(1);
-        }
-
         if (!new File(AppConfig.WORKING_DIRECTORY).equals(new File(System.getProperty("user.dir")))) {
             System.out.println("Please set the working directory to the location of the jar file.");
             System.exit(1);
@@ -120,7 +151,11 @@ public class DaemonApp {
         migrate();
         var sessionFactory = buildSessionFactory();
 
-        bootstrap(sessionFactory);
+        try {
+            bootstrap(sessionFactory);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // start the solution
         try {
@@ -130,8 +165,9 @@ public class DaemonApp {
         }
 
         // run the update loop
-        while (true) {
+        while (!AppConfig.DRY_RUN) {
             try {
+                System.out.println("Daemon: Dataset update in " + TimeUtils.millisTillNextUpdate(AppConfig.DAEMON_UPDATE_TRIGGER_HOUR) / 1000 / 60 / 60 + " hours");
                 Thread.sleep(TimeUtils.millisTillNextUpdate(AppConfig.DAEMON_UPDATE_TRIGGER_HOUR));
                 updateDataset(sessionFactory);
                 restartSolution(sessionFactory);

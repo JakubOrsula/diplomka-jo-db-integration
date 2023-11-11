@@ -9,7 +9,14 @@ import java.util.Arrays;
 
 public class SystemUtils {
     public static void exec(String[] scriptPath) {
+        exec(null, scriptPath);
+    }
+
+    public static void exec(String workingDirectory, String[] scriptPath) {
         ProcessBuilder pb = new ProcessBuilder(scriptPath);
+        if (workingDirectory != null) {
+            pb.directory(new java.io.File(workingDirectory));
+        }
         pb.redirectErrorStream(true);
 
         try {

@@ -11,6 +11,14 @@ import java.util.Properties;
 
 public class AppConfig {
     //todo maybe cli arg?
+    public static final String WORKING_DIRECTORY;
+    static {
+        try {
+            WORKING_DIRECTORY = new File(AppConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private static final String PROPERTIES_FILE = "run.properties";
     private static final Properties properties = new Properties();
 
@@ -30,22 +38,19 @@ public class AppConfig {
                 properties.load(inputStream);
                 inputStream.close();
             }
+            // qualify dependencies
+            for (String key : properties.stringPropertyNames()) {
+                if (key.startsWith("dependencies/")) {
+                    properties.setProperty(key, WORKING_DIRECTORY + "/" + properties.getProperty(key));
+                }
+            }
         } catch (Exception e) {
             throw new UnrecoverableError("Failed to load run.properties file. Make sure properties file is next .jar you are trying to run", e);
         }
     }
 
     /** DAEMON **/
-    public static final String WORKING_DIRECTORY;
     public static final int DAEMON_UPDATE_TRIGGER_HOUR = Integer.parseInt(properties.getProperty("DAEMON_UPDATE_TRIGGER_HOUR"));
-
-    static {
-        try {
-            WORKING_DIRECTORY = new File(AppConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
     public static boolean DRY_RUN;
 
     /** DISTANCE **/
@@ -81,9 +86,15 @@ public class AppConfig {
     public static final String MESSIFF_SKETCHES_LONG_CSV = properties.getProperty("messiff.sketches.long_csv");
     public static final String MESSIFF_PPP_CODES_SHORT_CSV = properties.getProperty("messiff.ppp_codes.short_csv");
     public static final String MESSIFF_PPP_CODES_LONG_CSV = properties.getProperty("messiff.ppp_codes.long_csv");
+    public static final String MESSIFF_PPP_CODES_BUILDER_SCRIPT = properties.getProperty("messiff.ppp_codes.builder_script");
+    public static final String MESSIFF_SKETCHES_SHORT_BIN = properties.getProperty("messiff.sketches.short_bin");
+    public static final String MESSIFF_SKETCHES_LONG_BIN = properties.getProperty("messiff.sketches.long_bin");
+    public static final String MESSIFF_PPP_CODES_SHORT_BIN = properties.getProperty("messiff.ppp_codes.short_bin");
+    public static final String MESSIFF_PPP_CODES_LONG_BIN = properties.getProperty("messiff.ppp_codes.long_bin");
 
     /** FLASK APP **/
     public static final String FLASK_LOCATION = properties.getProperty("flask.location");
+    public static final String PROTEINS_JAR_LOCATION = properties.getProperty("proteins.jar_location");
 
     /** DATASET UPDATE **/
     public static final String DATASET_REMOTE_URL = properties.getProperty("dataset.remote_url");
