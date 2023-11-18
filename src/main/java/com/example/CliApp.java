@@ -140,6 +140,11 @@ public class CliApp
                 .build()
                 .parse(args);
 
+        if (arguments.version) {
+            System.out.println(3.008);
+            return;
+        }
+
         AppConfig.DRY_RUN = arguments.dryRun;
 
         migrate();

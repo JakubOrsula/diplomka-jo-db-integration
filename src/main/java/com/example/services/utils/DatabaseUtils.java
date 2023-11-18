@@ -28,6 +28,7 @@ public class DatabaseUtils {
                         AppConfig.FLYWAY_CONNECTION_USERNAME,
                         AppConfig.FLYWAY_CONNECTION_PASSWORD)
                 .defaultSchema(AppConfig.DATABASE_NAME)
+                .validateMigrationNaming(true)
                 .locations("classpath:/db/migration")
                 .load();
         flyway.migrate();
