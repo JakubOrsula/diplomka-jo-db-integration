@@ -141,7 +141,7 @@ public class CliApp
                 .parse(args);
 
         if (arguments.version) {
-            System.out.println(3.009);
+            System.out.println(3.010);
             return;
         }
 
