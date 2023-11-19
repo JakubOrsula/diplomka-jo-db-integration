@@ -46,7 +46,7 @@ public class InstallationIntegrityCheck {
         var base_path = AppConfig.WORKING_DIRECTORY + "/" + "dependencies";
         var paths = new String[]{
                 base_path,
-                base_path + "/" + "gesamt",
+                base_path + "/" + "gesamt_distance",
                 base_path + "/" + "tbb",
                 base_path + "/" + "mics-proteins",
                 base_path + "/" + "mics-proteins" + "/" + "jars",

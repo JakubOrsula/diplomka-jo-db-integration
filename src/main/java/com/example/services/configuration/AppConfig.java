@@ -22,6 +22,7 @@ public class AppConfig {
     private static final String PROPERTIES_FILE = "run.properties";
     private static final Properties properties = new Properties();
 
+    // qualify dependencies
     static {
         try {
             // Try to load properties file from the same location as the JAR file
@@ -38,7 +39,7 @@ public class AppConfig {
                 properties.load(inputStream);
                 inputStream.close();
             }
-            // qualify dependencies
+
             for (String key : properties.stringPropertyNames()) {
                 if (key.startsWith("dependencies/")) {
                     properties.setProperty(key, WORKING_DIRECTORY + "/" + properties.getProperty(key));

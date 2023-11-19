@@ -30,7 +30,9 @@ public class DaemonApp {
 
     public static void bootstrap(SessionFactory sessionFactory) throws IOException {
         //installation integrity check
-        InstallationIntegrityCheck.run();
+        if (!InstallationIntegrityCheck.run()) {
+            throw new UnrecoverableError("Installation integrity check failed");
+        }
 
         //update subconfigs
         GenerateSubConfigs.run(AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
@@ -45,13 +47,13 @@ public class DaemonApp {
     }
 
     public static void restartMessiffs() throws InterruptedException {
-        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
-        SystemUtils.exec(new File(AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
-        SystemUtils.exec(new File(AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
         Thread.sleep(3*1000);
-        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});
-        SystemUtils.exec(new File(AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "start"});
-        SystemUtils.exec(new File(AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT).getParent(), new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "start"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "start"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "start"});
         Thread.sleep(3*1000);
     }
 
@@ -117,23 +119,11 @@ public class DaemonApp {
         System.out.println("Update dataset: Datasets for messiff created");
 
         System.out.println("Update dataset: Going to generate ppp codes");
-        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
-                new String[]{
-                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
-                        "murder"
-        });
-        Thread.sleep(3*1000);
-        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
-                new String[]{
-                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
-                        "start"
-        });
-        Thread.sleep(10*1000);
-        SystemUtils.exec(new File(AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT).getParent(),
-                new String[]{
-                        AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT,
-                        "stop"
-        });
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "murder"});
+        Thread.sleep(3 * 1000);
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "start"});
+        Thread.sleep(10 * 1000);
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "stop"});
         System.out.println("Update dataset: PPP codes generated");
 
 //        System.out.println("Update dataset: Going to generate secondary filtering csvs");
