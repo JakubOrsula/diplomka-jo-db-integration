@@ -15,7 +15,7 @@ public class SystemUtils {
         var modifiedScriptPath = scriptPath.clone();
         var parent = new File(modifiedScriptPath[0]).getParent();
         modifiedScriptPath[0] = Paths.get(modifiedScriptPath[0]).getFileName().toString();
-        exec(parent, scriptPath);
+        exec(parent, modifiedScriptPath);
     }
 
     public static void exec(String[] scriptPath) {
@@ -27,7 +27,8 @@ public class SystemUtils {
         var tag = "";
         if (workingDirectory != null) {
             pb.directory(new java.io.File(workingDirectory));
-            tag += workingDirectory + "/" + scriptPath[0];
+            tag += workingDirectory + ":" + scriptPath[0];
+            System.out.println(tag + ": Working directory set to " + workingDirectory);
         } else {
             tag += scriptPath[0];
         }

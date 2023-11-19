@@ -53,8 +53,6 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "algs",
-                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "logs",
-                base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "pids",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "Threshold_tables",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http-api.cf",
                 base_path + "/" + "mics-proteins" + "/" + "sequential_sketches" + "/" + "http_64pivots.defaults",
@@ -72,7 +70,7 @@ public class InstallationIntegrityCheck {
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.defaults",
                 base_path + "/" + "mics-proteins" + "/" + "ppp_codes" + "/" + "pppcodes.sh",
                 base_path + "/" + "ProteinSearch",
-                base_path + "/" + "ProteinSearch" + "/" + "venv" + "/" + "bin" + "activate",
+                base_path + "/" + "ProteinSearch" + "/" + "venv" + "/" + "bin" + "/" + "activate",
         };
 
         for (var path: paths) {
@@ -86,7 +84,7 @@ public class InstallationIntegrityCheck {
     }
 
     private static boolean checkCppDependenciesPresence() {
-        var path = AppConfig.WORKING_DIRECTORY + "/dependencies/build/distance/libProteinDistance.so";
+        var path = AppConfig.WORKING_DIRECTORY + "/dependencies/gesamt_distance/build/distance/libProteinDistance.so";
         if (!new java.io.File(path).exists()) {
             System.out.println("Installation integrity check failed: " + path + " does not exist");
             System.out.println("The gesamt library failed to build on jo-integration branch. See the install.sh script" +
