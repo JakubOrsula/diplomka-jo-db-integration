@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class SystemUtils {
     public static void execInParent(String[] scriptPath) {
@@ -23,6 +24,10 @@ public class SystemUtils {
     }
 
     public static void exec(String workingDirectory, String[] scriptPath) {
+        if (scriptPath[0].endsWith(".sh")) {
+            scriptPath = Stream.concat(Stream.of("/bin/bash"), Arrays.stream(scriptPath))
+                    .toArray(String[]::new);
+        }
         ProcessBuilder pb = new ProcessBuilder(scriptPath);
         var tag = "";
         if (workingDirectory != null) {
@@ -32,10 +37,13 @@ public class SystemUtils {
         } else {
             tag += scriptPath[0];
         }
+
+        if (scriptPath[1].endsWith(".sh")) {
+            tag += ":" + scriptPath[1];
+        }
         pb.redirectErrorStream(true);
 
         System.out.println(tag + ": " + "Executing " + Arrays.toString(scriptPath));
-
         try {
             Process p = pb.start();
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));

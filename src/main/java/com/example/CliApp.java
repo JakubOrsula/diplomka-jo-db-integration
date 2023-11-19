@@ -7,6 +7,7 @@ import com.example.services.entrypoints.applySketches.ApplySketches;
 import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
 import com.example.services.entrypoints.generateSubConfigs.GenerateSubConfigs;
 import com.example.services.entrypoints.ground_truth.GroundTruth;
+import com.example.services.entrypoints.runMessiff.RunMessiff;
 import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
@@ -102,6 +103,10 @@ public class CliApp
         GenerateSubConfigs.run(AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
     }
 
+    private static void runMessiff() {
+        RunMessiff.run();
+    }
+
     private static void loadLibrary(String libraryName) {
         String resourcePath = "/lib/" + System.mapLibraryName(libraryName);
 
@@ -169,6 +174,7 @@ public class CliApp
             case "groundTruth" -> groundTruth();
             case "updateDataset" -> updateDataset();
             case "generateSubConfigs" -> generateSubConfigs();
+            case "runMessiff" -> runMessiff();
             default -> System.out.println("Invalid function name passed. Please check the function name and try again.");
         }
         sessionFactory.close();
