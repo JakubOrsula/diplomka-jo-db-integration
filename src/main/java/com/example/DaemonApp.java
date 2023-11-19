@@ -28,7 +28,12 @@ import static com.example.services.utils.DatabaseUtils.migrate;
 public class DaemonApp {
     private final static FlaskAppController controller = new FlaskAppController();
 
-    public static void bootstrap(SessionFactory sessionFactory) throws IOException {
+    public static void bootstrap(SessionFactory sessionFactory) throws IOException, InterruptedException {
+        System.out.println("""
+                ############################################################
+                # BOOTSTRAP START
+                ############################################################
+                """);
         //installation integrity check
         if (!InstallationIntegrityCheck.run()) {
             throw new UnrecoverableError("Installation integrity check failed");
@@ -43,10 +48,20 @@ public class DaemonApp {
         GeneratePivotCsvs.run(sessionFactory, AppConfig.MESSIFF_SKETCHES_LONG_CSV, PivotPairsForXpSketchesService.tableNameBasedOnPivotCount(512));
         Files.copy(new File(AppConfig.MESSIFF_SKETCHES_SHORT_CSV).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_SHORT_CSV).toPath(), StandardCopyOption.REPLACE_EXISTING);
         Files.copy(new File(AppConfig.MESSIFF_SKETCHES_LONG_CSV).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_LONG_CSV).toPath(), StandardCopyOption.REPLACE_EXISTING);
-
+        createMessiffDatasets();
+        System.out.println("""
+                ############################################################
+                # BOOTSTRAP END
+                ############################################################
+                """);
     }
 
     public static void restartMessiffs() throws InterruptedException {
+        System.out.println("""
+                ############################################################
+                # MESSIFF RESTART START
+                ############################################################
+                """);
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
@@ -55,6 +70,11 @@ public class DaemonApp {
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "start"});
         Thread.sleep(3*1000);
+        System.out.println("""
+                ############################################################
+                # MESSIFF RESTART END
+                ############################################################
+                """);
     }
 
     public static void restartSolution(SessionFactory sessionFactory) throws InterruptedException {
@@ -103,6 +123,14 @@ public class DaemonApp {
         ApplySketches.run(sessionFactory, AppConfig.SKETCH_LEARNING_SKETCH_LENGTH);
         System.out.println("Update dataset: Long sketches applied");
 
+        createMessiffDatasets();
+
+//        System.out.println("Update dataset: Going to generate secondary filtering csvs");
+//        LearnSecondaryFilteringWithGHPSketches.start(sessionFactory, 1024);
+//        System.out.println("Update dataset: Secondary filtering csvs generated");
+    }
+
+    private static void createMessiffDatasets() throws InterruptedException {
         System.out.println("Update dataset: Create datasets for messiff");
         SystemUtils.exec(new String[]{
                 "java",
@@ -114,8 +142,6 @@ public class DaemonApp {
                 AppConfig.MESSIFF_SKETCHES_LONG_BIN,
                 AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH
         });
-        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_SHORT_BIN).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_SHORT_BIN).toPath(), StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(new File(AppConfig.MESSIFF_SKETCHES_LONG_BIN).toPath(), new File(AppConfig.MESSIFF_PPP_CODES_LONG_BIN).toPath(), StandardCopyOption.REPLACE_EXISTING);
         System.out.println("Update dataset: Datasets for messiff created");
 
         System.out.println("Update dataset: Going to generate ppp codes");
@@ -125,10 +151,6 @@ public class DaemonApp {
         Thread.sleep(10 * 1000);
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "stop"});
         System.out.println("Update dataset: PPP codes generated");
-
-//        System.out.println("Update dataset: Going to generate secondary filtering csvs");
-//        LearnSecondaryFilteringWithGHPSketches.start(sessionFactory, 1024);
-//        System.out.println("Update dataset: Secondary filtering csvs generated");
     }
 
     public static void main(String[] args) {
@@ -150,7 +172,7 @@ public class DaemonApp {
 
         try {
             bootstrap(sessionFactory);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 

@@ -37,15 +37,13 @@ messiff.ppp_codes.default_config=dependencies/mics-proteins/ppp_codes/pppcodes.d
 messiff.short_sketches.port=20009
 messiff.long_sketches.port=20003
 messiff.ppp_codes.port=20001
-messiff.sketches.short_csv=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/64_512/320_pairs.csv
-messiff.sketches.long_csv=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/1024_pairs.csv
+messiff.sketches.short_csv=dependencies/mics-proteins/sequential_sketches/csvPivotPairs/512/64_512/320_pairs.csv
+messiff.sketches.long_csv=dependencies/mics-proteins/sequential_sketches/csvPivotPairs/512/1024_pairs.csv
 messiff.ppp_codes.short_csv=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/64_512/320_pairs.csv
 messiff.ppp_codes.long_csv=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/1024_pairs.csv
 messiff.ppp_codes.builder_script=dependencies/mics-proteins/ppp_codes/pppcodes.sh
-messiff.sketches.short_bin=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/64_512/320_pairs.csv
-messiff.sketches.long_bin=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/1024_pairs.csv
-messiff.ppp_codes.short_bin=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/64_512/320_pairs.csv
-messiff.ppp_codes.long_bin=dependencies/mics-proteins/ppp_codes/csvPivotPairs/512/1024_pairs.csv
+messiff.sketches.short_bin=dependencies/mics-proteins/sequential_sketches/algs/sketchesOnly_64_from_512_sk194b.bin
+messiff.sketches.long_bin=dependencies/mics-proteins/sequential_sketches/algs/sketchesOnly_512_sk1024b.bin
 
 messiff.tmp_dir=dependencies/tmpfiles
 

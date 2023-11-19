@@ -179,5 +179,4 @@ public class CliApp
         }
         sessionFactory.close();
     }
-
 }
