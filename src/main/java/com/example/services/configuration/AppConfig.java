@@ -41,7 +41,7 @@ public class AppConfig {
             }
 
             for (String key : properties.stringPropertyNames()) {
-                if (key.startsWith("dependencies/")) {
+                if (properties.getProperty(key).startsWith("dependencies/")) {
                     properties.setProperty(key, WORKING_DIRECTORY + "/" + properties.getProperty(key));
                 }
             }
