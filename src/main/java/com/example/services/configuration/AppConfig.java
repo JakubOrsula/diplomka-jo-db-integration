@@ -91,6 +91,8 @@ public class AppConfig {
     public static final String MESSIFF_SKETCHES_LONG_BIN = properties.getProperty("messiff.sketches.long_bin");
     public static final String MESSIFF_PPP_CODES_SHORT_BIN = properties.getProperty("messiff.ppp_codes.short_bin");
     public static final String MESSIFF_PPP_CODES_LONG_BIN = properties.getProperty("messiff.ppp_codes.long_bin");
+    public static final String MESSIFF_LONG_SKETCHES_DEFAULT_CONFIG = properties.getProperty("messiff.long_sketches.default_config");
+    public static final String MESSIFF_PPP_CODES_DEFAULT_CONFIG = properties.getProperty("messiff.ppp_codes.default_config");
 
     /** FLASK APP **/
     public static final String FLASK_LOCATION = properties.getProperty("flask.location");

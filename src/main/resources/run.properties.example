@@ -31,6 +31,9 @@ messiff.short_sketches.manager_script=dependencies/sequential_sketches/http_64pi
 messiff.long_sketches.manager_script=dependencies/sequential_sketches/http_512pivots.sh
 messiff.ppp_codes.manager_script=dependencies/ppp_codes/http.sh
 
+messiff.long_sketches.default_config=dependencies/sequential_sketches/http_512pivots.defaults
+messiff.ppp_codes.default_config=dependencies/sequential_sketches/pppcodes.defaults
+
 messiff.short_sketches.port=20009
 messiff.long_sketches.port=20003
 messiff.ppp_codes.port=20001

@@ -5,13 +5,38 @@ import com.example.utils.UnrecoverableError;
 import org.ini4j.Wini;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class GenerateSubConfigs {
-    public static void run(String iniConfigLocation) {
-        System.out.println("GenerateSubConfigs.run");
+    public static void adjustMessiffBinaryDirConfigs() {
+        // Define file paths
+        Path sketchConfigPath = Paths.get(AppConfig.MESSIFF_LONG_SKETCHES_DEFAULT_CONFIG);
+        Path pppCodesConfigPath = Paths.get(AppConfig.MESSIFF_PPP_CODES_DEFAULT_CONFIG);
+
+        // Update files
+        adjustMessiffBinaryDirConfig(sketchConfigPath);
+        adjustMessiffBinaryDirConfig(pppCodesConfigPath);
+    }
+
+    private static void adjustMessiffBinaryDirConfig(Path filePath) {
+        try {
+            String content = Files.readString(filePath);
+            String updatedContent = content.replaceAll(
+                    "GESAMTLIBPATH=\\$\\{GESAMTLIBPATH:-MISSING_VALUE\\}",
+                    "GESAMTLIBPATH=${GESAMTLIBPATH:-" + AppConfig.DATASET_BINARY_DIR + "}"
+            );
+            Files.writeString(filePath, updatedContent);
+            System.out.println("Updated " + filePath);
+        } catch (IOException e) {
+            throw new UnrecoverableError("Failed to set new binary config location file " + filePath, e);
+        }
+    }
+
+    private static void createIniFile(String iniConfigLocation) {
         try{
             Files.write(Path.of(iniConfigLocation), new byte[0], StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             Wini ini = new Wini(new File(iniConfigLocation));
@@ -32,8 +57,21 @@ public class GenerateSubConfigs {
 
             System.out.println(ini);
             ini.store();
+            System.out.println(iniConfigLocation + " written");
         } catch(Exception e) {
             throw new UnrecoverableError("Failed to create ini file " + iniConfigLocation, e);
         }
+    }
+
+    public static void run(String iniConfigLocation) {
+        System.out.println("GenerateSubConfigs.run");
+
+        createIniFile(iniConfigLocation);
+
+        System.out.println("GenerateSubConfigs.run adjustMessifConfigs");
+        adjustMessiffBinaryDirConfigs();
+        System.out.println("GenerateSubConfigs.run adjustMessifConfigs done");
+
+        System.out.println("GenerateSubConfigs.run done");
     }
 }
