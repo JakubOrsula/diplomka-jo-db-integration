@@ -13,7 +13,7 @@ import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
 import com.example.services.entrypoints.selfchecks.GesamtLibIntegrationCheck;
 import com.example.services.entrypoints.updateDataset.UpdateDataset;
-import org.hibernate.Session;
+import com.example.services.utils.JavaUtils;
 import org.hibernate.SessionFactory;
 
 import java.io.*;
@@ -133,6 +133,12 @@ public class CliApp
 
     //todo normal runner
     public static void main(String[] args) {
+        try {
+            JavaUtils.validateNonNullProperties(AppConfig.class);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
 //        loadLibrary("ProteinDistance");
         Args arguments = new Args();
         JCommander.newBuilder()
@@ -150,22 +156,22 @@ public class CliApp
         migrate();
         sessionFactory = buildSessionFactory();
 
-        try (var session = sessionFactory.openSession()) {
-            switch (arguments.runFunction) {
-                case "checkGesamtLibPresence" -> checkGesamtLibPresence();
-                case "checkComputedDistances" -> checkComputedDistances(sessionFactory);
-                case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
-                case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
-                case "computeDistances" -> computeDistances(sessionFactory);
-                case "learnSketches" -> learnSketches(sessionFactory);
-                case "applySketches" -> applySketches(sessionFactory);
-                case "secondaryFiltering" -> secondaryFiltering(sessionFactory);
-                case "generatePivotPairs" -> generatePivotPairs(sessionFactory);
-                case "groundTruth" -> groundTruth();
-                case "updateDataset" -> updateDataset();
-                case "generateSubConfigs" -> generateSubConfigs();
-                default -> System.out.println("Invalid function name passed. Please check the function name and try again.");
-            }
+        switch (arguments.runFunction) {
+            case "checkGesamtLibPresence" -> checkGesamtLibPresence();
+            case "checkComputedDistances" -> checkComputedDistances(sessionFactory);
+            case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
+            case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
+            case "computeDistances" -> computeDistances(sessionFactory);
+            case "learnSketches" -> learnSketches(sessionFactory);
+            case "applySketches" -> applySketches(sessionFactory);
+            case "secondaryFiltering" -> secondaryFiltering(sessionFactory);
+            case "generatePivotPairs" -> generatePivotPairs(sessionFactory);
+            case "groundTruth" -> groundTruth();
+            case "updateDataset" -> updateDataset();
+            case "generateSubConfigs" -> generateSubConfigs();
+            default -> System.out.println("Invalid function name passed. Please check the function name and try again.");
         }
+        sessionFactory.close();
     }
+
 }

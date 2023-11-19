@@ -11,6 +11,7 @@ import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
 import com.example.services.entrypoints.selfchecks.InstallationIntegrityCheck;
 import com.example.services.entrypoints.updateDataset.UpdateDataset;
+import com.example.services.utils.JavaUtils;
 import com.example.services.utils.SystemUtils;
 import com.example.services.utils.TimeUtils;
 import com.example.utils.UnrecoverableError;
@@ -142,6 +143,12 @@ public class DaemonApp {
 
     public static void main(String[] args) {
         System.out.println("Daemon started");
+
+        try {
+            JavaUtils.validateNonNullProperties(AppConfig.class);
+        } catch (IllegalAccessException e) {
+            throw new UnrecoverableError("You have properties missing in the run.properties file. Check run.properties.example or AppConfig", e);
+        }
 
         if (!new File(AppConfig.WORKING_DIRECTORY).equals(new File(System.getProperty("user.dir")))) {
             System.out.println("Please set the working directory to the location of the jar file.");

@@ -25,14 +25,21 @@ public class GenerateSubConfigs {
     private static void adjustMessiffBinaryDirConfig(Path filePath) {
         try {
             String content = Files.readString(filePath);
-            String updatedContent = content.replaceAll(
-                    "GESAMTLIBPATH=\\$\\{GESAMTLIBPATH:-MISSING_VALUE\\}",
-                    "GESAMTLIBPATH=${GESAMTLIBPATH:-" + AppConfig.DATASET_BINARY_DIR + "}"
-            );
+
+            String[] lines = content.split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                if (lines[i].contains("GESAMTLIBPATH=${GESAMTLIBPATH:-MISSING_VALUE}")) {
+                    lines[i] = "GESAMTLIBPATH=${GESAMTLIBPATH:-" + AppConfig.DATASET_BINARY_DIR + "}";
+                    break;
+                }
+            }
+
+            String updatedContent = String.join("\n", lines);
+
             Files.writeString(filePath, updatedContent);
             System.out.println("Updated " + filePath);
         } catch (IOException e) {
-            throw new UnrecoverableError("Failed to set new binary config location file " + filePath, e);
+            throw new UnrecoverableError("Failed to update " + filePath, e);
         }
     }
 
