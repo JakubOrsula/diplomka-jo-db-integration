@@ -5,6 +5,7 @@ import com.example.utils.UnrecoverableError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 public class FlaskAppController {
 
@@ -22,7 +23,14 @@ public class FlaskAppController {
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.directory(new java.io.File(flaskAppPath));
                 pb.redirectErrorStream(true);
-                pb.command("source", "venv/bin/activate", "&&", "flask", "run");
+
+                Map<String, String> env = pb.environment();
+                String currentPythonPath = env.getOrDefault("PYTHONPATH", "");
+                String newPythonPath = currentPythonPath.isEmpty() ? "/usr/local/lib" : currentPythonPath + ":/usr/local/lib";
+                env.put("PYTHONPATH", newPythonPath);
+
+
+                pb.command("venv/bin/python", "-m", "flask", "run");
                 flaskProcess = pb.start();
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(flaskProcess.getInputStream()));

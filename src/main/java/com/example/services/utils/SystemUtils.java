@@ -6,8 +6,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class SystemUtils {
@@ -69,4 +72,34 @@ public class SystemUtils {
             throw new UnrecoverableError(tag + ": " + "Script execution interrupted " + Arrays.toString(scriptPath), e);
         }
     }
+
+    public static void deletePidsDir(String scriptLocation) {
+        try {
+            Path scriptPath = Paths.get(scriptLocation);
+            Path parentDir = scriptPath.getParent();
+
+            // Resolve the path to the 'pids' directory
+            Path pidsDir = parentDir.resolve("pids");
+
+            // Check if 'pids' directory exists and delete it
+            if (Files.exists(pidsDir) && Files.isDirectory(pidsDir)) {
+                try (Stream<Path> walk = Files.walk(pidsDir)) {
+                    walk.sorted(Comparator.reverseOrder())
+                            .forEach(path -> {
+                                try {
+                                    Files.delete(path);
+                                } catch (IOException e) {
+                                    System.err.println("Failed to delete: " + path + "; " + e.getMessage());
+                                }
+                            });
+                }
+                System.out.println("Deleted 'pids' directory successfully.");
+            } else {
+                System.out.println("'pids' directory does not exist.");
+            }
+        } catch (IOException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+        }
+    }
+
 }

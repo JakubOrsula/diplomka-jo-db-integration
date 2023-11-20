@@ -62,9 +62,16 @@ public class DaemonApp {
                 # MESSIFF RESTART START
                 ############################################################
                 """);
-        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "stop"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "stop"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "stop"});
+        Thread.sleep(3*1000);
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "murder"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "murder"});
+        SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_LONG_SKETCHES_MANAGER_SCRIPT, "murder"});
+        Thread.sleep(3*1000);
+        SystemUtils.deletePidsDir(AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT);
+        SystemUtils.deletePidsDir(AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT);
         Thread.sleep(3*1000);
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_MANAGER_SCRIPT, "start"});
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_SHORT_SKETCHES_MANAGER_SCRIPT, "start"});

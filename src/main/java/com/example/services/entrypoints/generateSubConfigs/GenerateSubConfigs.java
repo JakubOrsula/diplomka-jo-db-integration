@@ -50,6 +50,7 @@ public class GenerateSubConfigs {
 
             // DB block
             ini.put("db", "ip", AppConfig.DATABASE_ADDRESS);
+            ini.put("db", "host", "localhost"); //for flask, it assumes default port as well
             ini.put("db", "database", AppConfig.DATABASE_NAME);
             ini.put("db", "user", AppConfig.DATABASE_USERNAME);
             ini.put("db", "password", AppConfig.DATABASE_PASSWORD);
@@ -61,6 +62,8 @@ public class GenerateSubConfigs {
 
             // Dirs block
             ini.put("dirs", "computations", AppConfig.MESSIFF_TMP_DIR);
+            ini.put("dirs", "raw_pdbs", AppConfig.DATASET_RAW_DIR);
+            ini.put("dirs", "archive", AppConfig.DATASET_BINARY_DIR);
 
             System.out.println(ini);
             ini.store();
