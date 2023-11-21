@@ -49,6 +49,7 @@ messiff.tmp_dir=dependencies/tmpfiles
 
 flask.location=dependencies/ProteinSearch
 proteins.jar_location=dependencies/proteins.jar
+update_tool.runner_script=dependencies/ProteinSearch/utils/runner.sh
 
 SKETCH_LEARNING_SAMPLE_SIZE=1000000
 # daemon sets the following two automatically

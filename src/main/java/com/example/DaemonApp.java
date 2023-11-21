@@ -98,7 +98,7 @@ public class DaemonApp {
 
     public static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
         System.out.println("Update dataset: Going to fetch remote files");
-        UpdateDataset.updateFiles(AppConfig.DATASET_REMOTE_URL, AppConfig.DATASET_MIRROR_DIR, AppConfig.DATASET_RAW_DIR, AppConfig.DATASET_BINARY_DIR, AppConfig.DATASET_UPDATE_SCRIPT_PATH, AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
+        UpdateDataset.updateFiles();
         System.out.println("Update dataset: Remote file fetched, unzipped and inserted into database");
 
         System.out.println("Update dataset: Going to compute distances");

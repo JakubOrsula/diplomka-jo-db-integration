@@ -96,6 +96,7 @@ public class AppConfig {
     /** FLASK APP **/
     public static final String FLASK_LOCATION = properties.getProperty("flask.location");
     public static final String PROTEINS_JAR_LOCATION = properties.getProperty("proteins.jar_location");
+    public static final String UPDATE_TOOL_RUNNER_SCRIPT = properties.getProperty("update_tool.runner_script");
 
     /** DATASET UPDATE **/
     public static final String DATASET_REMOTE_URL = properties.getProperty("dataset.remote_url");
