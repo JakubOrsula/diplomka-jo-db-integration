@@ -19,7 +19,7 @@ database.password=OneCha1n2RuleThem4ll
 flyway.connection.username=root
 flyway.connection.password=password
 
-dataset.remote_url=rsync.ebi.ac.uk::pub/databases/pdb/data/structures/divided/mmCIF/
+dataset.remote_url=rsync.ebi.ac.uk::pub/databases/pdb/data/structures/divided/mmCIF
 dataset.mirror_dir=/mnt/data/PDBe_mirror
 dataset.raw_dir=/mnt/data/PDBe_raw
 dataset.binary_dir=/mnt/data/PDBe_binary

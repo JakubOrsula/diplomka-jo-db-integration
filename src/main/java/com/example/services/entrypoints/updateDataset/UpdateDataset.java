@@ -3,12 +3,13 @@ package com.example.services.entrypoints.updateDataset;
 
 import com.example.services.configuration.AppConfig;
 import static com.example.services.utils.SystemUtils.exec;
+import static com.example.services.utils.SystemUtils.execInParent;
 
 public class UpdateDataset {
 
     public static void updateFiles() {
         exec(new String[]{"rsync", "-rlptv", "--delete", AppConfig.DATASET_REMOTE_URL + "/", AppConfig.DATASET_MIRROR_DIR});
-        exec(new String[]{
+        execInParent(new String[]{
                 AppConfig.UPDATE_TOOL_RUNNER_SCRIPT,
                 "python3",
                 AppConfig.DATASET_UPDATE_SCRIPT_PATH,

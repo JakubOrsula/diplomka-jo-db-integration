@@ -6,12 +6,12 @@ public class InstallationIntegrityCheck {
 
     private static boolean checkDatasetDirectoriesSetup() {
         var checkParents = new String[]{
+                AppConfig.DATASET_REMOTE_URL,
                 AppConfig.DATASET_MIRROR_DIR,
                 AppConfig.DATASET_RAW_DIR,
                 AppConfig.DATASET_BINARY_DIR,
         };
-        for (var checkParent :
-                checkParents) {
+        for (var checkParent: checkParents) {
             if (checkParent.endsWith("/")) {
                 System.out.println("Installation integrity check failed: " + checkParent + " ends with /");
                 System.out.println("For consistency, specify the paths without trailing slash (/)");
