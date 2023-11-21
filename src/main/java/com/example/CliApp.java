@@ -89,14 +89,12 @@ public class CliApp
         GroundTruth.run();
     }
 
-    private static void updateDataset() {
-        UpdateDataset.run(
-                AppConfig.DATASET_REMOTE_URL,
-                AppConfig.DATASET_MIRROR_DIR,
-                AppConfig.DATASET_RAW_DIR,
-                AppConfig.DATASET_BINARY_DIR,
-                AppConfig.DATASET_UPDATE_SCRIPT_PATH,
-                AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
+    private static void updateDataset(SessionFactory sf) {
+        try {
+            DaemonApp.updateDataset(sf);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void generateSubConfigs() {
@@ -172,7 +170,7 @@ public class CliApp
             case "secondaryFiltering" -> secondaryFiltering(sessionFactory);
             case "generatePivotPairs" -> generatePivotPairs(sessionFactory);
             case "groundTruth" -> groundTruth();
-            case "updateDataset" -> updateDataset();
+            case "updateDataset" -> updateDataset(sessionFactory);
             case "generateSubConfigs" -> generateSubConfigs();
             case "runMessiff" -> runMessiff();
             default -> System.out.println("Invalid function name passed. Please check the function name and try again.");

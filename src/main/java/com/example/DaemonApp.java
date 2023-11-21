@@ -92,11 +92,11 @@ public class DaemonApp {
         restartMessiffs();
 
         //start flask
-        SystemUtils.exec(new String[]{"killall", "flask"});
+        SystemUtils.exec(new String[]{"kill", "-9", "$(pgrep -f 'flask run')"});
         controller.startFlaskApp(AppConfig.FLASK_LOCATION);
     }
 
-    private static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
+    public static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
         System.out.println("Update dataset: Going to fetch remote files");
         UpdateDataset.updateFiles(AppConfig.DATASET_REMOTE_URL, AppConfig.DATASET_MIRROR_DIR, AppConfig.DATASET_RAW_DIR, AppConfig.DATASET_BINARY_DIR, AppConfig.DATASET_UPDATE_SCRIPT_PATH, AppConfig.SUBCONFIGS_PYTHON_INI_CONFIG_PATH);
         System.out.println("Update dataset: Remote file fetched, unzipped and inserted into database");
