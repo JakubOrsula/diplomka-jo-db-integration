@@ -119,10 +119,10 @@ public class BinaryAndDBConsistencyFixer {
                             }
 
                             String fileName = file.getName();
-                            String gesamtId = fileName.substring(0, fileName.lastIndexOf(':')).toLowerCase();
+                            String cifname = fileName.substring(0, fileName.lastIndexOf('.')).toUpperCase();
 
                             var middle_slug = file.getParentFile().getName();
-                            var associated_bins = new File(AppConfig.DATASET_MIRROR_DIR + "/" + middle_slug);
+                            var associated_bins = new File(AppConfig.DATASET_BINARY_DIR + "/" + middle_slug);
                             if (!associated_bins.exists()) {
                                 System.out.println("Associated bins dir does not exist: " + associated_bins.getAbsolutePath());
                                 missingFiles++;
@@ -132,7 +132,8 @@ public class BinaryAndDBConsistencyFixer {
                             var bin_files = associated_bins.listFiles();
                             var seenFlag = false;
                             for (var bin_file : bin_files) {
-                                if (bin_file.getName().startsWith(gesamtId)) {
+                                var bin_file_name = bin_file.getName();
+                                if (bin_file_name.substring(0, bin_file_name.lastIndexOf(':')).equals(cifname)) {
                                     seenFlag = true;
                                     break;
                                 }
