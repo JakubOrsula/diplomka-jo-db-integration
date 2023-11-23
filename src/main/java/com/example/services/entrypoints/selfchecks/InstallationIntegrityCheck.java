@@ -6,7 +6,6 @@ public class InstallationIntegrityCheck {
 
     private static boolean checkDatasetDirectoriesSetup() {
         var checkParents = new String[]{
-                AppConfig.DATASET_REMOTE_URL,
                 AppConfig.DATASET_MIRROR_DIR,
                 AppConfig.DATASET_RAW_DIR,
                 AppConfig.DATASET_BINARY_DIR,

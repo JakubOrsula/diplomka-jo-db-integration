@@ -32,6 +32,7 @@ public class SystemUtils {
                     .toArray(String[]::new);
         }
         ProcessBuilder pb = new ProcessBuilder(scriptPath);
+
         var tag = "";
         if (workingDirectory != null) {
             pb.directory(new java.io.File(workingDirectory));
@@ -49,6 +50,8 @@ public class SystemUtils {
         System.out.println(tag + ": " + "Executing " + Arrays.toString(scriptPath));
         try {
             Process p = pb.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(p::destroy));
+
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {

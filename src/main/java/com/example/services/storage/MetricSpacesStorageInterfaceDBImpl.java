@@ -28,8 +28,6 @@ public class MetricSpacesStorageInterfaceDBImpl extends AbstractMetricSpacesStor
     }
 
     public Iterator<Object> getObjectsFromDataset(String datasetName, Object... params) {
-        // todo use the limit less function for without limit queries
-        //apply limit
         var limit = -1;
         if (params.length > 0) {
             limit = (int) params[0];

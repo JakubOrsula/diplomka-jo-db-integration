@@ -37,7 +37,6 @@ public abstract class ProteinChainDao {
         // query all rows from the Protein table
         session.beginTransaction();
         var query = getChainsSelectQuery(pivotSet);
-        //the scroll mode is shit, it iterates the whole table at db. Use manual paging just like in pcms
         List<Object[]> results = query.getResultList();
         session.getTransaction().commit();
         //todo sql limit

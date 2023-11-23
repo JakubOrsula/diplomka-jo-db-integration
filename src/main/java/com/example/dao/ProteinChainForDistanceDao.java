@@ -21,7 +21,7 @@ public class ProteinChainForDistanceDao extends ProteinChainDao {
         //todo this function needs to use indexedAsDataObject not to return pivots
 
         queryString += " from ProteinChain p left join ProteinChainMetadata pm on p.intId = pm.id.proteinChain.intId " +
-                "where p.indexedAsDataObject = true " +
+                "where p.added > '2023-08-08' p.indexedAsDataObject = true " +
                 "and (pm.id.proteinChain is null" +
                 " or ((length(pm.pivotDistances) < 200 or p.added > pm.lastUpdate) and pm.id.pivotSet = :pivotSet) " +
                 " or (pm.id.pivotSet != :pivotSet))";

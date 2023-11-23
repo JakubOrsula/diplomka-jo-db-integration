@@ -32,6 +32,7 @@ public class FlaskAppController {
 
                 pb.command("venv/bin/python", "-m", "flask", "run");
                 flaskProcess = pb.start();
+                Runtime.getRuntime().addShutdownHook(new Thread(flaskProcess::destroy));
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(flaskProcess.getInputStream()));
                 String line;
