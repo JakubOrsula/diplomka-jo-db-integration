@@ -10,10 +10,10 @@ import java.io.File;
 import java.util.Deque;
 import java.util.LinkedList;
 
-public class BinaryAndDBConsistencyFixer {
+public class FileSystemAndDBConsistencyFixer {
     private final Session session;
 
-    public BinaryAndDBConsistencyFixer(Session session) {
+    public FileSystemAndDBConsistencyFixer(Session session) {
         this.session = session;
     }
 

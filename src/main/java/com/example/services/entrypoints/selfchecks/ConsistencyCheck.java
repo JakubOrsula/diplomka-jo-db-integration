@@ -20,7 +20,7 @@ public class ConsistencyCheck {
     public static void CheckGesamtBinaryFilesAreInDB(File rootDir) {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
-            var fixer = new BinaryAndDBConsistencyFixer(session);
+            var fixer = new FileSystemAndDBConsistencyFixer(session);
             fixer.CheckGesamtBinaryFilesAreInDB(rootDir);
         }
     }
@@ -32,7 +32,7 @@ public class ConsistencyCheck {
     public static void CheckCifFilesHaveAtLeastOneChainFile(File rootDir) {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
-            var fixer = new BinaryAndDBConsistencyFixer(session);
+            var fixer = new FileSystemAndDBConsistencyFixer(session);
             fixer.CheckCifFilesHaveAtLeastOneChainFile(rootDir);
         }
     }
@@ -45,7 +45,7 @@ public class ConsistencyCheck {
     public static void RemoveProteinChainsWithoutFile(boolean dryRun) {
         try (SessionFactory sessionFactory = getSessionFactory();
              Session session = sessionFactory.openSession()) {
-            var fixer = new BinaryAndDBConsistencyFixer(session);
+            var fixer = new FileSystemAndDBConsistencyFixer(session);
             fixer.removeProteinChainsWithoutFile(dryRun);
         }
     }
