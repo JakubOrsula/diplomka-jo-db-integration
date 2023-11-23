@@ -13,7 +13,9 @@ import com.example.services.configuration.AppConfig;
 import com.example.services.utils.MapUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hibernate.Session;
+import vm.metricSpace.AbstractMetricSpace;
 import vm.metricSpace.Dataset;
+import vm.metricSpace.distance.DistanceFunctionInterface;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -151,6 +153,38 @@ public class EvalAndStoreObjectsToPivotsDists {
         System.out.println("Consumer finished");
     }
 
+    private void computeDistancesToPivots(Object o, AbstractMetricSpace<String> metricSpace, List<Object> pivots, DistanceFunctionInterface df) {
+        var startedAt = System.currentTimeMillis();
+        int oId = Integer.parseInt((String) metricSpace.getIDOfMetricObject(o));
+        Object oData = metricSpace.getDataOfMetricObject(o);
+        var distMap = new HashMap<String, Double>();
+        var distanceValid = true;
+        for (Object p : pivots) {
+            Object pData = metricSpace.getDataOfMetricObject(p);
+            try {
+                float distance = df.getDistance(oData, pData);
+                var pid = metricSpace.getIDOfMetricObject(p);
+                distMap.put(pid.toString(), (double) distance);
+            } catch (Exception e) {
+                distanceValid = false;
+                System.out.println("exception occured when calculating distance " + e.getMessage());
+            }
+        }
+
+        var distsMetadata = new DistsMetadata();
+        distsMetadata.setDists(distMap);
+
+        try {
+            var res = new EvaluationResult(startedAt, System.currentTimeMillis(), false, oId, Converter.toJsonString(distsMetadata));
+            System.out.printf("Computed distances to pivots in %.2f seconds" + " for " + oId + "/" + oData + " - " + res.metadata.substring(0, 50) + "%n", res.getTimeTaken());
+            if (distanceValid) {
+                queue.put(res);
+            }
+        } catch (JsonProcessingException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public void run(Dataset<String> dataset) { //todo loose the dataset and use your own beautiful functions
         System.out.println("Preparing data for computation...");
@@ -162,6 +196,12 @@ public class EvalAndStoreObjectsToPivotsDists {
         var pivots = dataset.getPivots(pivotCount);
         var proteins = dataset.getMetricObjectsFromDataset();
         var elgibleChainCount = proteinChainService.getChainsCount();
+        if (proteins.hasNext()) {
+            // prime the cache on single core
+            // segmentation fault occurs in the gesamt lib if pivots are loaded in parallel
+            computeDistancesToPivots(proteins.next(), metricSpace, pivots, df);
+        }
+
         Stream<Object> proteinStream = StreamSupport.stream(Spliterators.spliterator(proteins,
                 elgibleChainCount,
                 Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.SIZED),
@@ -169,37 +209,7 @@ public class EvalAndStoreObjectsToPivotsDists {
 
         System.out.println("Data prepared, going to process " + elgibleChainCount + " chains");
         backgroundConsumerThread.start();
-        proteinStream.forEach(o -> {
-            var startedAt = System.currentTimeMillis();
-            int oId = Integer.parseInt((String) metricSpace.getIDOfMetricObject(o));
-            Object oData = metricSpace.getDataOfMetricObject(o);
-            var distMap = new HashMap<String, Double>();
-            var distanceValid = true;
-            for (Object p : pivots) {
-                Object pData = metricSpace.getDataOfMetricObject(p);
-                try {
-                    float distance = df.getDistance(oData, pData);
-                    var pid = metricSpace.getIDOfMetricObject(p);
-                    distMap.put(pid.toString(), (double) distance);
-                } catch (Exception e) {
-                    distanceValid = false;
-                    System.out.println("exception occured when calculating distance " + e.getMessage());
-                }
-            }
-
-            var distsMetadata = new DistsMetadata();
-            distsMetadata.setDists(distMap);
-
-            try {
-                var res = new EvaluationResult(startedAt, System.currentTimeMillis(), false, oId, Converter.toJsonString(distsMetadata));
-                System.out.printf("Computed distances to pivots in %.2f seconds" + " for " + oId + "/" + oData + " - " + res.metadata.substring(0, 50) + "%n", res.getTimeTaken());
-                if (distanceValid) {
-                    queue.put(res);
-                }
-            } catch (JsonProcessingException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        proteinStream.forEach(o -> computeDistancesToPivots(o, metricSpace, pivots, df));
         try {
             queue.put(new EvaluationResult(0,0, true, 0, ""));
         } catch (InterruptedException e) {

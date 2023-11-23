@@ -140,7 +140,7 @@ public class BinaryAndDBConsistencyFixer {
                             }
                             if (!seenFlag) {
                                 missingFiles++;
-                                System.out.println("Cif file " + fileName + " does not have a corresponding bin file");
+                                System.out.println("Missing bin file for " + file.getAbsolutePath());
                             }
                             
                         } else if (file.isDirectory()) {
