@@ -98,4 +98,60 @@ public class BinaryAndDBConsistencyFixer {
         System.out.println("Total files processed: " + totalFiles);
     }
 
+    public void CheckCifFilesHaveAtLeastOneChainFile(File rootDirectory) {
+        System.out.println("Checking if all cif files have at least one chain file");
+        Deque<File> stack = new LinkedList<>();
+        stack.push(rootDirectory);
+
+        int totalFiles = 0;
+        int missingFiles = 0;
+
+        while (!stack.isEmpty()) {
+            File directory = stack.pop();
+            if (directory.isDirectory()) {
+                File[] files = directory.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            totalFiles++;
+                            if (totalFiles % 1000 == 0) {
+                                System.out.println("Processed " + totalFiles/1000 + "k files");
+                            }
+
+                            String fileName = file.getName();
+                            String gesamtId = fileName.substring(0, fileName.lastIndexOf(':')).toLowerCase();
+
+                            var middle_slug = file.getParentFile().getName();
+                            var associated_bins = new File(AppConfig.DATASET_MIRROR_DIR + "/" + middle_slug);
+                            if (!associated_bins.exists()) {
+                                System.out.println("Associated bins dir does not exist: " + associated_bins.getAbsolutePath());
+                                missingFiles++;
+                                continue;
+                            }
+                            
+                            var bin_files = associated_bins.listFiles();
+                            var seenFlag = false;
+                            for (var bin_file : bin_files) {
+                                if (bin_file.getName().startsWith(gesamtId)) {
+                                    seenFlag = true;
+                                    break;
+                                }
+                            }
+                            if (!seenFlag) {
+                                missingFiles++;
+                                System.out.println("Cif file " + fileName + " does not have a corresponding bin file");
+                            }
+                            
+                        } else if (file.isDirectory()) {
+                            stack.push(file);
+                        }
+                    }
+                }
+            }
+        }
+
+        System.out.println("Missing files: " + missingFiles);
+        System.out.println("Total files processed: " + totalFiles);
+    }
+
 }

@@ -26,6 +26,18 @@ public class ConsistencyCheck {
     }
 
     /**
+     * Checks whether cif files have at least one binary chain file associated.
+     * @param rootDir - root directory of cif files e.g /mnt/data/PDBe_raw
+     */
+    public static void CheckCifFilesHaveAtLeastOneChainFile(File rootDir) {
+        try (SessionFactory sessionFactory = getSessionFactory();
+             Session session = sessionFactory.openSession()) {
+            var fixer = new BinaryAndDBConsistencyFixer(session);
+            fixer.CheckCifFilesHaveAtLeastOneChainFile(rootDir);
+        }
+    }
+
+    /**
      * It might happen that binary files from which the chains were parsed are removed.
      * In such case we have no other option than to remove the chains from DB is as well.
      * @param dryRun - if true no destructive operation will be performed

@@ -28,7 +28,7 @@ public class ProteinChainForDistanceDao extends ProteinChainDao {
         //todo move app config to parameters
         if (AppConfig.COMPUTE_CHAIN_FROM != -1 && AppConfig.COMPUTE_CHAIN_TO != -1) {
             queryString += " and p.intId >= :chainFrom and p.intId <= :chainTo ";
-        } else { //order by size destroys concept of continuous intervals by id - JO says thats wrong, only the intervals will be ordered
+        } else { //order by size destroys concept of continuous intervals by id
             queryString += " order by p.chainLength desc"; //ordering from biggest chains gives better estimates on max running time
         }
         var query = session.createQuery(queryString)

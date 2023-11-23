@@ -51,6 +51,10 @@ public class CliApp
         ConsistencyCheck.CheckGesamtBinaryFilesAreInDB(new File(AppConfig.DATASET_BINARY_DIR));
     }
 
+    private static void CheckCifFilesHaveAtLeastOneChainFile() {
+        ConsistencyCheck.CheckCifFilesHaveAtLeastOneChainFile(new File(AppConfig.DATASET_RAW_DIR));
+    }
+
     private static void removeProteinChainsWithoutFile(boolean dryRun) {
         ConsistencyCheck.RemoveProteinChainsWithoutFile(dryRun);
     }
@@ -163,6 +167,7 @@ public class CliApp
             case "checkGesamtLibPresence" -> checkGesamtLibPresence();
             case "checkComputedDistances" -> checkComputedDistances(sessionFactory);
             case "checkGesamtBinaryFilesAreInDB" -> checkGesamtBinaryFilesAreInDB();
+            case "checkCifFilesHaveAtLeastOneChainFile" -> CheckCifFilesHaveAtLeastOneChainFile();
             case "removeProteinChainsWithoutFile" -> removeProteinChainsWithoutFile(arguments.dryRun);
             case "computeDistances" -> computeDistances(sessionFactory);
             case "learnSketches" -> learnSketches(sessionFactory);
