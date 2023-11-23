@@ -111,17 +111,17 @@ public class BinaryAndDBConsistencyFixer {
             if (directory.isDirectory()) {
                 File[] files = directory.listFiles();
                 if (files != null) {
-                    for (File file : files) {
-                        if (file.isFile()) {
+                    for (File cifFile : files) {
+                        if (cifFile.isFile()) {
                             totalFiles++;
                             if (totalFiles % 1000 == 0) {
                                 System.out.println("Processed " + totalFiles/1000 + "k files");
                             }
 
-                            String fileName = file.getName();
-                            String cifname = fileName.substring(0, fileName.lastIndexOf('.')).toUpperCase();
+                            String cifFileName = cifFile.getName();
+                            String cifname = cifFileName.substring(0, cifFileName.lastIndexOf('.')).toUpperCase();
 
-                            var middle_slug = file.getParentFile().getName();
+                            var middle_slug = cifFile.getParentFile().getName();
                             var associated_bins = new File(AppConfig.DATASET_BINARY_DIR + "/" + middle_slug);
                             if (!associated_bins.exists()) {
                                 System.out.println("Associated bins dir does not exist: " + associated_bins.getAbsolutePath());
@@ -140,11 +140,21 @@ public class BinaryAndDBConsistencyFixer {
                             }
                             if (!seenFlag) {
                                 missingFiles++;
-                                System.out.println("Missing bin file for " + file.getAbsolutePath());
+                                System.out.println("Missing bin file for " + cifFile.getAbsolutePath());
+                                if (!AppConfig.DRY_RUN) {
+                                    if (missingFiles > 10000) {
+                                        System.out.println("In this run 10k cif files were removed. It is likely that something went wrong. Aborting.");
+                                        System.out.println("If you are sure that everything is fine, run this program again");
+                                        return;
+                                    }
+                                    if (!cifFile.delete()) {
+                                        System.out.println("Failed to delete " + cifFile.getAbsolutePath());
+                                    }
+                                }
                             }
                             
-                        } else if (file.isDirectory()) {
-                            stack.push(file);
+                        } else if (cifFile.isDirectory()) {
+                            stack.push(cifFile);
                         }
                     }
                 }
