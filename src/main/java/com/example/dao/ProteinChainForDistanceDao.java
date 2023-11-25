@@ -23,7 +23,7 @@ public class ProteinChainForDistanceDao extends ProteinChainDao {
         queryString += " from ProteinChain p left join ProteinChainMetadata pm on p.intId = pm.id.proteinChain.intId " +
                 "where p.added > '2023-08-08' and p.indexedAsDataObject = true " +
                 "and (pm.id.proteinChain is null" +
-                " or ((length(pm.pivotDistances) < 200 or p.added > pm.lastUpdate) and pm.id.pivotSet = :pivotSet) " +
+                " or (p.added > pm.lastUpdate and pm.id.pivotSet = :pivotSet) " +
                 " or (pm.id.pivotSet != :pivotSet))";
         //todo move app config to parameters
         if (AppConfig.COMPUTE_CHAIN_FROM != -1 && AppConfig.COMPUTE_CHAIN_TO != -1) {
