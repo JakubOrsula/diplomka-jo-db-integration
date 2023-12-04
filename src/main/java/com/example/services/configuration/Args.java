@@ -14,7 +14,7 @@ public class Args {
             learnSketches
             applySketches
             secondaryFiltering
-            generatePivotPairs
+            generatePivotPairsCSVs
             groundTruth
             updateDataset
             generateSubConfigs

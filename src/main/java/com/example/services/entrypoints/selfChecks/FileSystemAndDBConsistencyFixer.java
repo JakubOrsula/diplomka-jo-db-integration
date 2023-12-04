@@ -1,4 +1,4 @@
-package com.example.services.entrypoints.selfchecks;
+package com.example.services.entrypoints.selfChecks;
 
 import com.example.model.ProteinChain;
 import com.example.services.configuration.AppConfig;

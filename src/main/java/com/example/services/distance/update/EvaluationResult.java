@@ -1,7 +1,5 @@
 package com.example.services.distance.update;
 
-import com.example.model.SimpleProtein;
-
 public class EvaluationResult {
     public final long startedAtMillis;
     public final long finishedAtMillis;

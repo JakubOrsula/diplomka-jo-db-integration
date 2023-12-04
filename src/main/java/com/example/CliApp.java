@@ -8,12 +8,11 @@ import com.example.services.entrypoints.generatePivotCsvs.GeneratePivotCsvs;
 import com.example.services.entrypoints.generateSubConfigs.GenerateSubConfigs;
 import com.example.services.entrypoints.ground_truth.GroundTruth;
 import com.example.services.entrypoints.runMessiff.RunMessiff;
-import com.example.services.entrypoints.selfchecks.ConsistencyCheck;
+import com.example.services.entrypoints.selfChecks.ConsistencyCheck;
 import com.example.services.entrypoints.distanceComputation.DistanceComputation;
 import com.example.services.entrypoints.learnSketches.LearnSketches;
 import com.example.services.entrypoints.secondaryFiltering.LearnSecondaryFilteringWithGHPSketches;
-import com.example.services.entrypoints.selfchecks.GesamtLibIntegrationCheck;
-import com.example.services.entrypoints.updateDataset.UpdateDataset;
+import com.example.services.entrypoints.selfChecks.GesamtLibIntegrationCheck;
 import com.example.services.utils.JavaUtils;
 import org.hibernate.SessionFactory;
 
@@ -173,7 +172,7 @@ public class CliApp
             case "learnSketches" -> learnSketches(sessionFactory);
             case "applySketches" -> applySketches(sessionFactory);
             case "secondaryFiltering" -> secondaryFiltering(sessionFactory);
-            case "generatePivotPairs" -> generatePivotPairs(sessionFactory);
+            case "generatePivotPairsCSVs" -> generatePivotPairs(sessionFactory);
             case "groundTruth" -> groundTruth();
             case "updateDataset" -> updateDataset(sessionFactory);
             case "generateSubConfigs" -> generateSubConfigs();
