@@ -40,7 +40,7 @@ public class ApplySketches {
             int[] sketchesLengths = new int[]{sketchesLength};
 
             //we want full cache. Todo cleaner variant without hardcoded constants
-            var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, 720000, 512));
+            var metricSpace = new ProteinAbstractMetricSpaceDBImpl(new CachedDistanceFunctionInterfaceImpl<String>(session, pivotService, AppConfig.SKETCH_LEARNING_SAMPLE_SIZE, AppConfig.SKETCH_LEARNING_PIVOTS_COUNT));
             //for learning sketches will return proteins with distance
             //todo correct the "for" naming later
             var proteinChainDao = new ProteinChainForLearningSketchesDao(session);

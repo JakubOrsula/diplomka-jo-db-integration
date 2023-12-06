@@ -7,14 +7,12 @@ import com.example.model.SimpleProtein;
 import com.example.service.PivotService;
 import com.example.service.PivotSetService;
 import com.example.service.ProteinChainMetadataService;
+import com.example.utils.UnrecoverableError;
 import org.hibernate.Session;
 import vm.metricSpace.distance.DistanceFunctionInterface;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CachedDistanceFunctionInterfaceImpl<T> extends DistanceFunctionInterface<String> {
@@ -44,14 +42,24 @@ public class CachedDistanceFunctionInterfaceImpl<T> extends DistanceFunctionInte
             var dist_dict = pd.metadata.getDists();
             dataSetSample.add(new SimpleProtein(pd.chainIntId, pd.gesamtId));
 
+            if (Objects.equals(pd.gesamtId, "8HKX:AS4P")) {
+                System.out.println("8HKX:AS4P");
+            }
+
             //dist into matrix, ordered by columnHeaders
             intPivotToIdxMapping.forEach((key, value) -> {
                 Double dist = dist_dict.get(key.toString());
+                if (dist == null) {
+                    throw new UnrecoverableError("distance not found for protein " + pd.gesamtId + ", pivot:" + key);
+                }
                 float distFloat = dist.floatValue();
                 cache[counter.get()][value] = distFloat;
             });
-            counter.incrementAndGet();
-            if (counter.getOpaque() % 10000 == 0)
+            var counterVal = counter.incrementAndGet();
+            if (counterVal >= sampleSize) {
+                throw new UnrecoverableError("sample size exceeded");
+            }
+            if (counterVal % 10000 == 0)
                 System.out.println("Prepared " + counter + " matrix rows");
         }
     }
