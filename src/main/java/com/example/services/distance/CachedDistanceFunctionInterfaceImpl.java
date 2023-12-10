@@ -42,10 +42,6 @@ public class CachedDistanceFunctionInterfaceImpl<T> extends DistanceFunctionInte
             var dist_dict = pd.metadata.getDists();
             dataSetSample.add(new SimpleProtein(pd.chainIntId, pd.gesamtId));
 
-            if (Objects.equals(pd.gesamtId, "8HKX:AS4P")) {
-                System.out.println("8HKX:AS4P");
-            }
-
             //dist into matrix, ordered by columnHeaders
             intPivotToIdxMapping.forEach((key, value) -> {
                 Double dist = dist_dict.get(key.toString());

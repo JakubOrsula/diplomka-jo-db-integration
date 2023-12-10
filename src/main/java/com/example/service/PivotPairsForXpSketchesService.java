@@ -30,7 +30,7 @@ public class PivotPairsForXpSketchesService {
         return tableNameBasedOnPivotCount(AppConfig.SKETCH_LEARNING_PIVOTS_COUNT);
     }
 
-    private long pairsCount() {
+    public long pairsCount() {
         PivotSet pivotSet = pivotSetService.GetCurrentPivotSet();
         return pivotPairsForXpSketchesDao.pairsCount(pivotSet, tableNameBasedOnPivotCount());
     }

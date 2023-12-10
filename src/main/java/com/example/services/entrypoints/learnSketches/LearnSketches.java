@@ -28,6 +28,11 @@ public class LearnSketches {
             var pivotSetService = new PivotSetService(new PivotSetDao(session));
             var pivotService = new PivotService(new PivotDao(session), pivotSetService);
             var pivotPairsForXpSketchesService = new PivotPairsForXpSketchesService(pivotSetService, new PivotPairsForXpSketchesDao(session));
+            if (pivotPairsForXpSketchesService.pairsCount() > 0) {
+                System.out.println("Pivot pairs already stored. Skipping.");
+                System.out.println("If you want to relearn the sketches, delete the pivot pairs from the database.");
+                return;
+            }
             GHPSketchingPivotPairsStoreInterface sketchingTechStorage = new GHPSketchesPivotPairsStorageDBImpl(session, pivotPairsForXpSketchesService, pivotSetService);
             int[] sketchesLengths = new int[]{AppConfig.SKETCH_LEARNING_SKETCH_LENGTH};
             var sampleSize = AppConfig.SKETCH_LEARNING_SAMPLE_SIZE;
