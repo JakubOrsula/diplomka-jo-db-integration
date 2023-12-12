@@ -138,7 +138,7 @@ public class DaemonApp {
     }
 
     private static void createMessiffDatasets() throws InterruptedException {
-        System.out.println("Update dataset: Create datasets for messiff");
+        System.out.println("Update dataset: Create datasets for messiff (sketches");
         SystemUtils.exec(new String[]{
                 "java",
                 "--add-opens",

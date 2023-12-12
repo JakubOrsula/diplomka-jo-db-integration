@@ -95,7 +95,7 @@ public class InstallationIntegrityCheck {
         path = "/usr/local/lib/libProteinDistance.so";
         if (!new java.io.File(path).exists()) {
             System.out.println("Installation integrity check failed: " + path + " does not exist");
-            System.out.println("The gesamt library failed to build on jo-integration branch. See the install.sh script" +
+            System.out.println("The gesamt library failed to build on master branch. See the install.sh script" +
                     " and try to install gesamt library manually");
             return false;
         }
