@@ -86,14 +86,14 @@ public class DaemonApp {
 
     public static void restartSolution(SessionFactory sessionFactory) throws InterruptedException {
         //stop flask
-        controller.stopFlaskApp();
+//        controller.stopFlaskApp();
 
         //restart the messiffs
         restartMessiffs();
 
         //start flask
-        SystemUtils.exec(new String[]{"kill", "-9", "$(pgrep -f 'flask run')"});
-        controller.startFlaskApp(AppConfig.FLASK_LOCATION);
+//        SystemUtils.exec(new String[]{"kill", "-9", "$(pgrep -f 'flask run')"});
+//        controller.startFlaskApp(AppConfig.FLASK_LOCATION);
     }
 
     public static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
