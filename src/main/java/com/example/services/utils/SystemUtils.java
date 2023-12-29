@@ -55,6 +55,9 @@ public class SystemUtils {
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {
+                if (line.length() > 2000) {
+                    line = line.substring(0, 2000) + "...";
+                }
                 System.out.println(tag + ": " + line);
             }
 
