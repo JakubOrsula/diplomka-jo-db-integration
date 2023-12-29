@@ -26,7 +26,6 @@ import static com.example.services.utils.DatabaseUtils.buildSessionFactory;
 import static com.example.services.utils.DatabaseUtils.migrate;
 
 public class DaemonApp {
-    private final static FlaskAppController controller = new FlaskAppController();
 
     public static void bootstrap(SessionFactory sessionFactory) throws IOException, InterruptedException {
         System.out.println("""
@@ -85,15 +84,12 @@ public class DaemonApp {
     }
 
     public static void restartSolution(SessionFactory sessionFactory) throws InterruptedException {
-        //stop flask
-//        controller.stopFlaskApp();
+        //todo serve some maintenance page while messiff is restarting
 
         //restart the messiffs
         restartMessiffs();
 
-        //start flask
-//        SystemUtils.exec(new String[]{"kill", "-9", "$(pgrep -f 'flask run')"});
-//        controller.startFlaskApp(AppConfig.FLASK_LOCATION);
+        FlaskAppController.restartFlask();
     }
 
     public static void updateDataset(SessionFactory sessionFactory) throws IOException, InterruptedException {
