@@ -147,7 +147,7 @@ public class DaemonApp {
         });
         System.out.println("Update dataset: Datasets for messiff created");
 
-        System.out.println("Update dataset: Going to generate ppp codes");
+        System.out.println("Update dataset: Going to generate ppp codes. THIS WILL TAKE A WHILE");
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "murder"});
         Thread.sleep(3 * 1000);
         SystemUtils.execInParent(new String[]{AppConfig.MESSIFF_PPP_CODES_BUILDER_SCRIPT, "start"});
@@ -187,7 +187,7 @@ public class DaemonApp {
         }
 
         // run the update loop
-        while (!AppConfig.DRY_RUN) {
+        while (true) {
             try {
                 System.out.println("Daemon: Dataset update in " + TimeUtils.millisTillNextUpdate(AppConfig.DAEMON_UPDATE_TRIGGER_HOUR) / 1000 / 60 / 60 + " hours");
                 Thread.sleep(TimeUtils.millisTillNextUpdate(AppConfig.DAEMON_UPDATE_TRIGGER_HOUR));
